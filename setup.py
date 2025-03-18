@@ -1,8 +1,8 @@
 import os
 import subprocess
 
-folder_1 = "Face_reg"
-folder_2 = "img-cap"
+folder_1 = "database"
+folder_2 = "snapshots"
 
 now_path = os.path.dirname(os.path.realpath(__file__))
 
