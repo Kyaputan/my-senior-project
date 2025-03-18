@@ -28,11 +28,11 @@ session = requests.Session()
 root = ctk.CTk()
 folder_path = os.path.dirname(os.path.realpath(__file__))
 
-path_Yolo = os.path.join(folder_path, "modelYolo.onnx")
-path_RTDETR = os.path.join(folder_path, "modelRTDETR.onnx")
+path_Yolo = os.path.join(folder_path, "modules\modelYolo.onnx")
+path_RTDETR = os.path.join(folder_path, "modules\ModelRT.pt")
 
 model_Yolo = YOLO(path_Yolo,task='detect')
-model_RTDETR = YOLO(path_RTDETR,task='detect')
+model_RTDETR = YOLO(path_RTDETR)
 
 
 global selected_value, cap_a, cap_b, cap_r , detection_mode, model_selection , cap_c , cap_d , cap_e , cap_f , cap_g
@@ -71,7 +71,7 @@ Additional = None
 
 def load_image():
     global images_logos
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
     images_logos["logo_BG_image"] = ctk.CTkImage(
         Image.open(os.path.join(image_path, "bg_gradient.jpg")), size=(1080, 1080)
     )
@@ -2138,7 +2138,7 @@ def Additional_Detection_1():
     Additional.geometry(f"{screen_width}x{screen_height}")
 
     # Get image directory path
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
     # Load images
     logo_KMITL_image = ctk.CTkImage(
@@ -2223,7 +2223,7 @@ def additional_Detection_2():
     Additional.geometry(f"{screen_width}x{screen_height}")
 
     # Get image directory path
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
     # Load images
     logo_KMITL_image = ctk.CTkImage(
@@ -2320,7 +2320,7 @@ def additional_Detection_3():
     Additional.geometry(f"{screen_width}x{screen_height}")
 
     # Get image directory path
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
     # Load images
     logo_KMITL_image = ctk.CTkImage(
@@ -2431,7 +2431,7 @@ def additional_Detection_4():
     Additional.geometry(f"{screen_width}x{screen_height}")
 
     # Get image directory path
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
     # Load images
     logo_KMITL_image = ctk.CTkImage(
@@ -2564,7 +2564,7 @@ def additional_Detection_5():
     Additional.geometry(f"{screen_width}x{screen_height}")
 
     # Get image directory path
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
     # Load images
     logo_KMITL_image = ctk.CTkImage(
