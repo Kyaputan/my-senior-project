@@ -36,6 +36,9 @@ try:
 except Exception as e:
     print("เกิดข้อผิดพลาด:", e)
     
+
+
+
 root = ctk.CTk()
 folder_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -69,16 +72,6 @@ home_frame = second_frame = Third_frame = None
 entry_name = entry_password_sitting = url_now = ""
 images_logos = {}
 Additional = None
-
-
-# def show_address():
-#     global url_6 , url_5 , url_4 ,url_3 , url_2 , url_1
-#     print(f'url_1 {url_1}')
-#     print(f'url_2 {url_2}')
-#     print(f'url_3 {url_3}')
-#     print(f'url_4 {url_4}')
-#     print(f'url_5 {url_5}')
-#     print(f'url_6 {url_6}')
 
 def load_image():
     global images_logos
@@ -195,7 +188,6 @@ def show_frame(frame_name):
     second_frame.pack_forget()
     Third_frame.pack_forget()
 
-    # Show the requested frame
     if frame_name == "home":
         home_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
     elif frame_name == "frame_2":
@@ -233,7 +225,7 @@ def find_known_face_names():
                     known_face_names.append(name)
                     time.sleep(0.1)
 
-    if len(known_face_names) == 0:  # If no known faces were found
+    if len(known_face_names) == 0:   
         messagebox.showerror("Error", "No Face input received")
     else:
         print(f"รู้จักบุคคลจำนวน {len(known_face_names)} คน: {known_face_names}")
@@ -258,7 +250,7 @@ def show_frame_r(label_r, folder_path, interval=5):
     small_frame = cv2.resize(frame, (320, 240))
     small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
     detect_bounding_box(small_frame)
-    # Display image on label
+
     img = Image.fromarray(small_frame)
     imgtk = ImageTk.PhotoImage(image=img)
     label_r.imgtk = imgtk
@@ -273,7 +265,7 @@ def toggle_camera_r():
         cap_r.release()
     else:
         running_r = True
-        cap_r = cv2.VideoCapture(0)  # กล้อง A ใช้ index 0
+        cap_r = cv2.VideoCapture(0)  
         folder_path = os.path.dirname(os.path.realpath(__file__))
         Face_path = os.path.join(folder_path, "Face_reg")
         thread_r = threading.Thread(
@@ -288,9 +280,9 @@ def detect_yolo(frame):
     snake_found = False
     personfall_found = False
     vomit_found = False
-    for result in results:  # results เป็นลิสต์
-        for detection in result.boxes:  # เข้าถึงข้อมูลการตรวจจับในแต่ละผลลัพธ์
-            class_id = int(detection.cls)  # หมายเลขคลาส
+    for result in results:   
+        for detection in result.boxes: 
+            class_id = int(detection.cls)  
             if class_id == 3:
                 snake_found = True
             elif class_id == 0:
@@ -323,7 +315,7 @@ def detect_yolo(frame):
     if personfall_found:
         personfall_count += 1
         print(f"personfall_count : {personfall_count}")
-        if personfall_count == 30:  # ถ้าพบคนครบ 10 ครั้ง
+        if personfall_count == 30: 
             
             img_folder = os.path.join(folder_path, "img-cap")
             img_person = os.path.join(img_folder, f"personfall_detected_{int(time.time())}.jpg")
@@ -335,9 +327,9 @@ def detect_yolo(frame):
             P = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_P)
             time.sleep(0.3)
             print(P.text)
-            personfall_count = 0  # เริ่มนับใหม่
+            personfall_count = 0 
     else:
-        personfall_count = 0  # เริ่มนับใหม่เมื่อไม่พบคน
+        personfall_count = 0 
 
     if vomit_found:
         vomit_count += 1
@@ -354,9 +346,9 @@ def detect_yolo(frame):
             V = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_V)
             time.sleep(0.3)
             print(V.text)
-            vomit_count = 0  # เริ่มนับใหม่
+            vomit_count = 0   
     else:
-        vomit_count = 0  # เริ่มนับใหม่เมื่อไม่พบรถ
+        vomit_count = 0 
     return results[0].plot()
 
 
@@ -377,7 +369,7 @@ def face_recog(frame):
         
         confidence = (1 - face_distances[best_match_index]) * 100  
         
-        if matches[best_match_index] and confidence > 65:
+        if matches[best_match_index] and confidence > 45:
             name = known_face_names[best_match_index]
         face_names.append(name)
         current_time = time.time()
@@ -878,21 +870,20 @@ def start():
     screen_height = Start_window.winfo_screenheight() / 2
     Start_window.geometry(f"{screen_width}x{screen_height}")
     load_image()
-    # Background image
+ 
     bg_image_label = ctk.CTkLabel(
         Start_window, text="", image=images_logos["logo_BG_image"]
     )
     bg_image_label.place(
         relx=0, rely=0, relwidth=1, relheight=1
-    )  # Fill the entire window
-    # Lower the background image to be behind other widgets
+    )
     bg_image_label.lower()
 
-    # Configure logo frame
+
     logo_frame = ctk.CTkFrame(Start_window)
     logo_frame.pack(
         fill="x", pady=(0, 10)
-    )  # Centering the frame horizontally with some padding
+    )  
 
     navigation_frame_label_KMITL = ctk.CTkLabel(
         logo_frame,
@@ -913,7 +904,6 @@ def start():
     )
     logo_rie_label.pack(side="left", pady=(10, 10))
 
-    # Create the label for the text (separate from the logo)
     text_rie_label = ctk.CTkLabel(
         logo_frame,
         text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง วิทยาเขตชุมพรเขตรอุดมศักดิ์ \nRobotics and Intelligent Electronics Engineering",
@@ -922,9 +912,9 @@ def start():
     )
     text_rie_label.pack(side="left", padx=10, pady=(10, 10))
 
-    # Video frame
+
     video_frame = ctk.CTkFrame(Start_window)
-    video_frame.pack(fill="y", pady=5)  # Fill the remaining space
+    video_frame.pack(fill="y", pady=5) 
 
     frame_a = ctk.CTkFrame(
         video_frame, width=320, height=320, fg_color="white", corner_radius=20
@@ -933,7 +923,7 @@ def start():
     label_a = ctk.CTkLabel(
         frame_a, text="", image=images_logos["logo_KMITL_image"], width=320, height=320
     )
-    label_a.pack(side="top", expand=True, padx=10)  # Expand to fill remaining space
+    label_a.pack(side="top", expand=True, padx=10)  
     toggle_a_button = ctk.CTkButton(
         frame_a,
         text="เปิดกล้อง 1",
@@ -952,7 +942,7 @@ def start():
     )
     label_b.pack(
         side="top", expand=True, padx=10
-    )  # Split the space for both video labels
+    ) 
     toggle_b_button = ctk.CTkButton(
         frame_b,
         text="เปิดกล้อง 2",
@@ -1010,7 +1000,7 @@ def start():
     )
     button4.pack(side="left", padx=10, pady=10)
 
-    # Detection Mode
+
     detection_mode = tk.StringVar(value="")
     model_selection = tk.StringVar(value="")
     modes = ["Face_Recognition", "YOLO", "Both"]
@@ -1019,7 +1009,7 @@ def start():
     head_radio_frame = ctk.CTkFrame(Start_window)
     head_radio_frame.pack(pady=(0,5), padx=10, fill="x", side="top")
 
-    # Create Radio Buttons for detection mode
+
     mode_label = ctk.CTkLabel(
         head_radio_frame,
         text="Detection Mode",
@@ -1031,7 +1021,7 @@ def start():
     radio_frame = ctk.CTkFrame(head_radio_frame, corner_radius=10)
     radio_frame.pack(pady=5, padx=10, fill="x", side="bottom")
 
-    # Create a frame for modes
+
     mode_frame = ctk.CTkFrame(radio_frame, corner_radius=10)
     mode_frame.pack(side="left", pady=5, padx=20, anchor="n")
 
@@ -1048,7 +1038,6 @@ def start():
         )
         rb.pack(pady=3, padx=20, anchor="w",fill="both")
 
-    # Create a frame for model_Yolo choices
     model_frame = ctk.CTkFrame(radio_frame, corner_radius=10)
     model_frame.pack(side="right", pady=5, padx=20, anchor="n")
 
@@ -1105,9 +1094,9 @@ def find_names():
     Face_path = os.path.join(folder_path, "Face_reg")
     for filename in os.listdir(Face_path):
         if filename.endswith(".jpg"):
-            name_without_extension = os.path.splitext(filename)[0]  # ตัดส่วนขยายออก
-            if name_without_extension not in All_name:  # ตรวจสอบว่าชื่อซ้ำหรือไม่
-                All_name.append(name_without_extension)  # เก็บเฉพาะชื่อไฟล์
+            name_without_extension = os.path.splitext(filename)[0]   
+            if name_without_extension not in All_name:  
+                All_name.append(name_without_extension)  
     return All_name
 
 
@@ -1125,21 +1114,20 @@ def face_recording():
     face_window.resizable(False, False)
     find_names()
     load_image()
-    # Background image
+
     bg_image_label = ctk.CTkLabel(
         face_window, text="", image=images_logos["logo_BG_image"]
     )
 
     bg_image_label.place(
         relx=0, rely=0, relwidth=1, relheight=1
-    )  # Fill the entire window
-    # Lower the background image to be behind other widgets
+    )  
     bg_image_label.lower()
 
     logo_frame = ctk.CTkFrame(face_window)
     logo_frame.pack(
         fill="x", pady=(0, 10)
-    )  # Centering the frame horizontally with some padding
+    ) 
 
     navigation_frame_label_KMITL = ctk.CTkLabel(
         logo_frame,
@@ -1160,7 +1148,7 @@ def face_recording():
     )
     logo_rie_label.pack(side="left", pady=(10, 10))
 
-    # Create the label for the text (separate from the logo)
+
     text_rie_label = ctk.CTkLabel(
         logo_frame,
         text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง วิทยาเขตชุมพรเขตรอุดมศักดิ์ \nRobotics and Intelligent Electronics Engineering",
@@ -1170,7 +1158,7 @@ def face_recording():
     text_rie_label.pack(side="left", padx=10, pady=(10, 10))
 
     main_frame = ctk.CTkFrame(face_window, fg_color="black")
-    main_frame.pack(fill="y", pady=20)  # Fill the remaining space
+    main_frame.pack(fill="y", pady=20) 
 
     video_frame = ctk.CTkFrame(main_frame, fg_color="#161616")
     video_frame.pack(side="left", fill="y")
@@ -1184,7 +1172,7 @@ def face_recording():
     )
     label_r.pack(
         side="top", expand=True, padx=10, pady=10
-    )  # Expand to fill remaining space
+    )  
     button1 = ctk.CTkButton(frame_r, text="เปิดกล้อง", command=toggle_camera_r)
     button1.pack(side="bottom", pady=10)
     exit_bottom = ctk.CTkButton(
@@ -1261,7 +1249,7 @@ def save_image_b():
 
 
 def countdown_and_save():
-    countdown(4)  # เริ่มนับถอยหลังจาก 4 วินาที
+    countdown(4) 
 
 
 def countdown(count):
@@ -1270,7 +1258,7 @@ def countdown(count):
             text=f"Saving in {count}...",
             text_color="yellow",
             font=ctk.CTkFont(size=18, weight="bold"),
-        )  # แสดงข้อความนับถอยหลัง
+        ) 
         label_r.after(1000, countdown, count - 1)
     else:
         save_image_b()
@@ -1324,11 +1312,11 @@ def setting():
     window_setting.resizable(False, False)
     find_names()
     load_image()
-    # create navigation frame
+
     navigation_frame = ctk.CTkFrame(window_setting, corner_radius=20)
     navigation_frame.pack(side="left", fill="y", padx=10, pady=10)
 
-    # create navigation labels and buttons
+
     navigation_frame_label = ctk.CTkLabel(
         navigation_frame,
         text="  SITTING MENU",
@@ -1395,15 +1383,12 @@ def setting():
     )
     exit_sitting_Button.pack(side="bottom", padx=20, pady=20)
 
-    # Create the home_frame
     home_frame = ctk.CTkFrame(window_setting, corner_radius=0, fg_color="transparent")
     home_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
-    # Create the bottom part (center, left-bottom, and right-bottom frames)
     mid_frame = ctk.CTkFrame(home_frame, corner_radius=0, fg_color="transparent")
     mid_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
-    # Create center frame (above left and right frames)
     center_frame = ctk.CTkFrame(
         mid_frame, corner_radius=20, fg_color="gray50", height=50
     )
@@ -1524,7 +1509,6 @@ def setting():
     )
     User_manual_10.pack(pady=(5, 10))
 
-    # Create left-bottom frame (same width as right-frame)
     left_frame = ctk.CTkFrame(
         mid_frame,
         corner_radius=30,
@@ -1549,11 +1533,9 @@ def setting():
         command=change_appearance_mode_event,
         width=100,
     )
-    appearance_mode_menu.pack(pady=(5, 10))  # Span over 3 columns
+    appearance_mode_menu.pack(pady=(5, 10)) 
     appearance_mode_menu.set("Light")
-    # Set scaling option menu
 
-    # Create right-bottom frame (same width as left-frame)
     right_frame = ctk.CTkFrame(
         mid_frame,
         corner_radius=30,
@@ -1627,7 +1609,7 @@ def setting():
     entry_password_sitting = ctk.CTkEntry(password_frame, show="*", placeholder_text="Enter password")
     entry_password_sitting.pack(side="left", fill="x", expand=True, padx=10)
 
-    # Create frame for "Open Address" button and label
+
     button_frame = ctk.CTkFrame(tabview.tab("Camera 1"), fg_color="transparent")
     button_frame.pack(padx=10, pady=5, fill="x")
 
@@ -1637,19 +1619,18 @@ def setting():
     string_input_button = ctk.CTkButton(button_frame, text="Open Address",command=input_dialog_Address_1)
     string_input_button.pack(side="left", fill="x", expand=True, padx=10)
 
-    # Create frame for port option menu and label
+
     port_frame = ctk.CTkFrame(tabview.tab("Camera 1"), fg_color="transparent")
     port_frame.pack(padx=10, pady=5, fill="x")
 
     label_port = ctk.CTkLabel(port_frame, text=" คุณภาพ", image=images_logos["sitting_logo"], compound="left", width=label_width, anchor="w", font=ctk.CTkFont(size=14))
     label_port.pack(side="left", padx=10, pady=5)
 
-    # Create a second option menu for quality selection
+
     quality_values = ["เลือกคุณภาพ", "คุณภาพสูง", "ประสิทธิภาพสูง"]
     optionmenu_quality_values = ctk.CTkOptionMenu(port_frame, dynamic_resizing=True, values=quality_values,command=quality_selected)
     optionmenu_quality_values.pack(side="left", fill="x", expand=True, padx=10)
 
-    # Agree button
     agree_button = ctk.CTkButton(tabview.tab("Camera 1"), text="agree", fg_color="green", hover_color="#46b842",command=combine_button_1)
     agree_button.pack(pady=10,fill="x", expand=True,padx=40)
 
@@ -1721,9 +1702,6 @@ def setting():
     agree_button = ctk.CTkButton(tabview.tab("Camera 6"), text="agree", fg_color="green", hover_color="#46b842",command=combine_button_6)
     agree_button.pack(pady=10,fill="x", expand=True,padx=40)
     
-    
-    # show_button = ctk.CTkButton(tabview.tab("Camera 6"), text="agree", fg_color="red", hover_color="#46b842",command=show_address)
-    # show_button.pack(pady=10,fill="x", expand=True,padx=40)
 
     label_port = ctk.CTkLabel(
         second_frame,
@@ -1875,8 +1853,7 @@ def combine_button_1():
         password = entry_password_sitting.get() 
         url_1 = f'rtsp://{name}:{password}@{ip_camera_url_1}:554/{global_selected_quality}'
         print("Address:", url_1)
-        
-        # อัปเดตข้อความใน url_now เพื่อแสดง URL
+
         url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_1}")
     else:
         print("No address input received")
@@ -1892,8 +1869,7 @@ def combine_button_2():
         password = entry_password_sitting.get() 
         url_2 = f'rtsp://{name}:{password}@{ip_camera_url_2}:554/{global_selected_quality}'
         print("Address:", url_2)
-        
-        # อัปเดตข้อความใน url_now เพื่อแสดง URL
+
         url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_2}")
     else:
         print("No address input received")
@@ -1910,7 +1886,7 @@ def combine_button_3():
         url_3 = f'rtsp://{name}:{password}@{ip_camera_url_3}:554/{global_selected_quality}'
         print("Address:", url_3)
         
-        # อัปเดตข้อความใน url_now เพื่อแสดง URL
+        
         url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_3}")
     else:
         print("No address input received")
@@ -1927,7 +1903,7 @@ def combine_button_4():
         url_4 = f'rtsp://{name}:{password}@{ip_camera_url_4}:554/{global_selected_quality}'
         print("Address:", url_4)
         
-        # อัปเดตข้อความใน url_now เพื่อแสดง URL
+        
         url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_4}")
     else:
         print("No address input received")
@@ -1944,7 +1920,7 @@ def combine_button_5():
         url_5 = f'rtsp://{name}:{password}@{ip_camera_url_5}:554/{global_selected_quality}'
         print("Address:", url_5)
         
-        # อัปเดตข้อความใน url_now เพื่อแสดง URL
+        
         url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_5}")
     else:
         print("No address input received")
@@ -1961,7 +1937,7 @@ def combine_button_6():
         url_6 = f'rtsp://{name}:{password}@{ip_camera_url_6}:554/{global_selected_quality}'
         print("Address:", url_6)
         
-        # อัปเดตข้อความใน url_now เพื่อแสดง URL
+        
         url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_6}")
     else:
         print("No address input received")
@@ -1970,7 +1946,7 @@ def combine_button_6():
 
 def exit_program():
     if messagebox.askokcancel("Exit", "Do you really want to exit?"):
-        root.destroy()  # ปิดหน้าต่างหลัก
+        root.destroy()  
 
 
 def credit():
@@ -1988,23 +1964,20 @@ def Main_window():
     root.resizable(False, False)
     load_image()
 
-    # Background
+
     bg_image_label = ctk.CTkLabel(root, text="", image=images_logos["logo_BG_image"])
     bg_image_label.place(relx=0, rely=0, relwidth=1, relheight=1)
     bg_image_label.lower()
 
-    # Main container frame
     main_container = ctk.CTkFrame(root, fg_color=("#ffffff", "#01061d"))
     main_container.pack(fill="both", expand=True, padx=20, pady=20)
 
-    # Header frame with gradient background
     header_frame = ctk.CTkFrame(
         main_container, corner_radius=15, fg_color=("#ffffff", "#01061d"), height=150
     )
     header_frame.pack(fill="x", pady=(0, 20))
     header_frame.pack_propagate(False)
 
-    # Logo layout
     logo_container = ctk.CTkFrame(header_frame, fg_color="transparent")
     logo_container.pack(fill="x", padx=20, pady=10)
 
@@ -2047,7 +2020,6 @@ def Main_window():
     )
     subtitle_label.pack(anchor="w")
 
-    # Menu frame with glass effect
     menu_frame = ctk.CTkFrame(
         main_container,
         corner_radius=20,
@@ -2057,7 +2029,6 @@ def Main_window():
     )
     menu_frame.pack(pady=20, padx=100)
 
-    # Title
     logo_label = ctk.CTkLabel(
         menu_frame,
         text="ระบบความปลอดภัย",
@@ -2066,7 +2037,6 @@ def Main_window():
     )
     logo_label.pack(padx=40, pady=30)
 
-    # Buttons
     button_style = {
         "height": 40,
         "width": 200,
@@ -2130,7 +2100,6 @@ def Main_window():
         **button_style,
     )
     exit_button.pack(pady=(10, 30))
-    # Add labels and buttons
 
     root.mainloop()
 
@@ -2145,13 +2114,11 @@ def Additional_Detection_1():
     screen_width = Additional.winfo_screenwidth() / 2
     screen_height = Additional.winfo_screenheight() / 2
 
-    # Set window size to full screen
+
     Additional.geometry(f"{screen_width}x{screen_height}")
 
-    # Get image directory path
     image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
-    # Load images
     logo_KMITL_image = ctk.CTkImage(
         Image.open(os.path.join(image_path, "KMITL-Photoroom.png")), size=(130, 130)
     )
@@ -2159,7 +2126,6 @@ def Additional_Detection_1():
         Image.open(os.path.join(image_path, "RIE-Photoroom.png")), size=(130, 130)
     )
 
-    # Logo frame
     logo_frame = ctk.CTkFrame(Additional)
     logo_frame.pack(fill="x", pady=(0, 10))
 
@@ -2186,37 +2152,33 @@ def Additional_Detection_1():
     )
     text_rie_label.pack(side="left", padx=10, pady=(10, 10))
 
-    # Video frame container
+
     video_container = ctk.CTkFrame(Additional)
     video_container.pack(fill="both", expand=True, pady=20)
 
-    # Frame for the video content
     frame_c = ctk.CTkFrame(
         video_container, width=350, height=320, fg_color="white", corner_radius=10
     )
     frame_c.pack(side="top", expand=True, anchor="center", pady=(5, 10), padx=30)
 
-    # Label with an image
     label_c = ctk.CTkLabel(
         frame_c, text="", image=logo_KMITL_image, width=300, height=310
     )
     label_c.pack(side="top", expand=True, pady=(10, 0))
 
-    # Button
+
     button1 = ctk.CTkButton(frame_c, text="เปิดกล้อง 3", command=toggle_camera_c)
     button1.pack(side="bottom", pady=(10, 10))
 
-    # Menu frame
     menu_frame = ctk.CTkFrame(Additional, height=100)
     menu_frame.pack(pady=5, fill="y", side="top", padx=10)
 
-    # Add Camera Frames button
+
     add_camera_button = ctk.CTkButton(
         menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
-
-    # Back button
+    
     back_button = ctk.CTkButton(
         menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
     )
@@ -2230,13 +2192,13 @@ def additional_Detection_2():
     screen_width = Additional.winfo_screenwidth() / 2
     screen_height = Additional.winfo_screenheight() / 2
 
-    # Set window size to full screen
+    
     Additional.geometry(f"{screen_width}x{screen_height}")
 
-    # Get image directory path
+    
     image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
-    # Load images
+    
     logo_KMITL_image = ctk.CTkImage(
         Image.open(os.path.join(image_path, "KMITL-Photoroom.png")), size=(130, 130)
     )
@@ -2244,7 +2206,7 @@ def additional_Detection_2():
         Image.open(os.path.join(image_path, "RIE-Photoroom.png")), size=(130, 130)
     )
 
-    # Logo frame
+    
     logo_frame = ctk.CTkFrame(Additional)
     logo_frame.pack(fill="x", pady=(0, 10))
 
@@ -2271,11 +2233,11 @@ def additional_Detection_2():
     )
     text_rie_label.pack(side="left", padx=10, pady=(10, 10))
 
-    # Video frame container
+    
     video_container = ctk.CTkFrame(Additional)
     video_container.pack(fill="both", expand=True, pady=20)
 
-    # Frame C - Left
+    
     frame_c = ctk.CTkFrame(
         video_container, width=350, height=320, fg_color="white", corner_radius=10
     )
@@ -2289,7 +2251,7 @@ def additional_Detection_2():
     buttonc = ctk.CTkButton(frame_c, text="เปิดกล้อง 3")
     buttonc.pack(side="bottom", pady=(10, 10))
 
-    # Frame D - Right
+    
     frame_d = ctk.CTkFrame(
         video_container, width=350, height=320, fg_color="white", corner_radius=10
     )
@@ -2303,17 +2265,17 @@ def additional_Detection_2():
     buttond = ctk.CTkButton(frame_d, text="เปิดกล้อง 4")
     buttond.pack(side="bottom", pady=(10, 10))
 
-    # Menu frame
+    
     menu_frame = ctk.CTkFrame(Additional, height=100)
     menu_frame.pack(pady=5, fill="y", side="top", padx=10)
 
-    # Add Camera Frames button
+    
     add_camera_button = ctk.CTkButton(
         menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
 
-    # Back button
+
     back_button = ctk.CTkButton(
         menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
     )
@@ -2327,13 +2289,13 @@ def additional_Detection_3():
     screen_width = Additional.winfo_screenwidth() / 2
     screen_height = Additional.winfo_screenheight() / 2
 
-    # Set window size to full screen
+    
     Additional.geometry(f"{screen_width}x{screen_height}")
 
-    # Get image directory path
+    
     image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
-    # Load images
+    
     logo_KMITL_image = ctk.CTkImage(
         Image.open(os.path.join(image_path, "KMITL-Photoroom.png")), size=(130, 130)
     )
@@ -2341,7 +2303,7 @@ def additional_Detection_3():
         Image.open(os.path.join(image_path, "RIE-Photoroom.png")), size=(130, 130)
     )
 
-    # Logo frame
+    
     logo_frame = ctk.CTkFrame(Additional)
     logo_frame.pack(fill="x", pady=(0, 10))
 
@@ -2368,11 +2330,11 @@ def additional_Detection_3():
     )
     text_rie_label.pack(side="left", padx=10, pady=(10, 10))
 
-    # Video frame container
+    
     video_container = ctk.CTkFrame(Additional)
     video_container.pack(fill="both", expand=True, pady=20)
 
-    # Frame C - Left
+    
     frame_c = ctk.CTkFrame(
         video_container, width=350, height=320, fg_color="white", corner_radius=10
     )
@@ -2386,7 +2348,7 @@ def additional_Detection_3():
     buttonc = ctk.CTkButton(frame_c, text="เปิดกล้อง 3")
     buttonc.pack(side="bottom", pady=(10, 10))
 
-    # Frame D - Center
+    
     frame_d = ctk.CTkFrame(
         video_container, width=350, height=320, fg_color="white", corner_radius=10
     )
@@ -2400,7 +2362,7 @@ def additional_Detection_3():
     buttond = ctk.CTkButton(frame_d, text="เปิดกล้อง 4")
     buttond.pack(side="bottom", pady=(10, 10))
 
-    # Frame E - Right
+    
     frame_e = ctk.CTkFrame(
         video_container, width=350, height=320, fg_color="white", corner_radius=10
     )
@@ -2414,17 +2376,17 @@ def additional_Detection_3():
     buttone = ctk.CTkButton(frame_e, text="เปิดกล้อง 5")
     buttone.pack(side="bottom", pady=(10, 10))
 
-    # Menu frame
+    
     menu_frame = ctk.CTkFrame(Additional, height=100)
     menu_frame.pack(pady=5, fill="y", side="top", padx=10)
 
-    # Add Camera Frames button
+    
     add_camera_button = ctk.CTkButton(
         menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
 
-    # Back button
+    
     back_button = ctk.CTkButton(
         menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
     )
@@ -2438,13 +2400,13 @@ def additional_Detection_4():
     screen_width = Additional.winfo_screenwidth() / 2
     screen_height = Additional.winfo_screenheight() / 2
 
-    # Set window size to full screen
+    
     Additional.geometry(f"{screen_width}x{screen_height}")
 
-    # Get image directory path
+    
     image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
-    # Load images
+    
     logo_KMITL_image = ctk.CTkImage(
         Image.open(os.path.join(image_path, "KMITL-Photoroom.png")), size=(100, 100)
     )
@@ -2452,7 +2414,7 @@ def additional_Detection_4():
         Image.open(os.path.join(image_path, "RIE-Photoroom.png")), size=(100, 100)
     )
 
-    # Logo frame
+    
     logo_frame = ctk.CTkFrame(Additional)
     logo_frame.pack(fill="x", pady=(0, 10))
 
@@ -2479,15 +2441,15 @@ def additional_Detection_4():
     )
     text_rie_label.pack(side="left", padx=10, pady=(10, 10))
 
-    # Video frame container
+    
     video_container = ctk.CTkFrame(Additional)
     video_container.pack(fill="both", expand=True)
 
-    # Top container for 3 frames
+
     top_container = ctk.CTkFrame(video_container)
     top_container.pack(fill="x", expand=True, pady=(10, 5))
 
-    # Frame C - Top Left
+
     frame_c = ctk.CTkFrame(
         top_container, width=300, height=200, fg_color="white", corner_radius=10
     )
@@ -2501,7 +2463,6 @@ def additional_Detection_4():
     buttonc = ctk.CTkButton(frame_c, text="เปิดกล้อง 1")
     buttonc.pack(side="bottom", pady=(10, 10))
 
-    # Frame D - Top Center
     frame_d = ctk.CTkFrame(
         top_container, width=300, height=200, fg_color="white", corner_radius=10
     )
@@ -2515,11 +2476,11 @@ def additional_Detection_4():
     buttond = ctk.CTkButton(frame_d, text="เปิดกล้อง 2")
     buttond.pack(side="bottom", pady=(10, 10))
 
-    # Bottom container for 2 frames
+
     bottom_container = ctk.CTkFrame(video_container)
     bottom_container.pack(fill="x", expand=True, pady=(5, 10))
 
-    # Frame E - Top Right
+
     frame_e = ctk.CTkFrame(
         bottom_container, width=300, height=200, fg_color="white", corner_radius=10
     )
@@ -2533,7 +2494,7 @@ def additional_Detection_4():
     buttone = ctk.CTkButton(frame_e, text="เปิดกล้อง 3")
     buttone.pack(side="bottom", pady=(10, 10))
 
-    # Frame F - Bottom Left
+
     frame_f = ctk.CTkFrame(
         bottom_container, width=300, height=200, fg_color="white", corner_radius=10
     )
@@ -2547,17 +2508,17 @@ def additional_Detection_4():
     buttonf = ctk.CTkButton(frame_f, text="เปิดกล้อง 4")
     buttonf.pack(side="bottom", pady=(10, 10))
 
-    # Menu frame
+    
     menu_frame = ctk.CTkFrame(Additional, height=100)
     menu_frame.pack(pady=5, fill="y", side="top", padx=10)
 
-    # Add Camera Frames button
+    
     add_camera_button = ctk.CTkButton(
         menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
 
-    # Back button
+    
     back_button = ctk.CTkButton(
         menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
     )
@@ -2571,13 +2532,13 @@ def additional_Detection_5():
     screen_width = Additional.winfo_screenwidth() / 2
     screen_height = Additional.winfo_screenheight() / 2
 
-    # Set window size to full screen
+    
     Additional.geometry(f"{screen_width}x{screen_height}")
 
-    # Get image directory path
+    
     image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
 
-    # Load images
+    
     logo_KMITL_image = ctk.CTkImage(
         Image.open(os.path.join(image_path, "KMITL-Photoroom.png")), size=(100, 100)
     )
@@ -2585,7 +2546,7 @@ def additional_Detection_5():
         Image.open(os.path.join(image_path, "RIE-Photoroom.png")), size=(100, 100)
     )
 
-    # Logo frame
+    
     logo_frame = ctk.CTkFrame(Additional)
     logo_frame.pack(fill="x", pady=(0, 10))
 
@@ -2612,15 +2573,15 @@ def additional_Detection_5():
     )
     text_rie_label.pack(side="left", padx=10, pady=(10, 10))
 
-    # Video frame container
+    
     video_container = ctk.CTkFrame(Additional)
     video_container.pack(fill="both", expand=True)
 
-    # Top container for 3 frames
+
     top_container = ctk.CTkFrame(video_container)
     top_container.pack(fill="x", expand=True, pady=(10, 5))
 
-    # Frame C - Top Left
+
     frame_c = ctk.CTkFrame(
         top_container, width=300, height=200, fg_color="white", corner_radius=10
     )
@@ -2634,7 +2595,6 @@ def additional_Detection_5():
     buttonc = ctk.CTkButton(frame_c, text="เปิดกล้อง 1")
     buttonc.pack(side="bottom", pady=(10, 10))
 
-    # Frame D - Top Center
     frame_d = ctk.CTkFrame(
         top_container, width=300, height=200, fg_color="white", corner_radius=10
     )
@@ -2648,7 +2608,6 @@ def additional_Detection_5():
     buttond = ctk.CTkButton(frame_d, text="เปิดกล้อง 2")
     buttond.pack(side="bottom", pady=(10, 10))
 
-    # Frame E - Top Right
     frame_e = ctk.CTkFrame(
         top_container, width=300, height=200, fg_color="white", corner_radius=10
     )
@@ -2662,11 +2621,9 @@ def additional_Detection_5():
     buttone = ctk.CTkButton(frame_e, text="เปิดกล้อง 3")
     buttone.pack(side="bottom", pady=(10, 10))
 
-    # Bottom container for 2 frames
     bottom_container = ctk.CTkFrame(video_container)
     bottom_container.pack(fill="x", expand=True, pady=(5, 10))
 
-    # Frame F - Bottom Left
     frame_f = ctk.CTkFrame(
         bottom_container, width=300, height=200, fg_color="white", corner_radius=10
     )
@@ -2680,7 +2637,6 @@ def additional_Detection_5():
     buttonf = ctk.CTkButton(frame_f, text="เปิดกล้อง 4")
     buttonf.pack(side="bottom", pady=(10, 10))
 
-    # Frame G - Bottom Right
     frame_g = ctk.CTkFrame(
         bottom_container, width=300, height=200, fg_color="white", corner_radius=10
     )
@@ -2694,17 +2650,16 @@ def additional_Detection_5():
     buttong = ctk.CTkButton(frame_g, text="เปิดกล้อง 5")
     buttong.pack(side="bottom", pady=(10, 10))
 
-    # Menu frame
+    
     menu_frame = ctk.CTkFrame(Additional, height=100)
     menu_frame.pack(pady=5, fill="y", side="top", padx=10)
 
-    # Add Camera Frames button
+    
     add_camera_button = ctk.CTkButton(
         menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
 
-    # Back button
     back_button = ctk.CTkButton(
         menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
     )
