@@ -24,7 +24,18 @@ url_line = "https://notify-api.line.me/api/notify"
 TOKEN = "TOKEN_LINE_API"
 LINE_HEADERS = {"Authorization":"Bearer "+TOKEN}
 session = requests.Session()
+try:
+    message_Start = {'message': 'ยินดีต้อนรับเข้าสู่ ระบบระวังภัยภายในบ้านพร้อมแจ้งเตือนผ่านแอปพลิเคชันไลน์'}
+    START = session.post(url_line, headers=LINE_HEADERS, data=message_Start)
 
+    if START.status_code == 200:
+        print("ส่งข้อความสำเร็จ:", START.text)
+    else:
+        print("เกิดข้อผิดพลาด:", START.status_code, START.text)
+
+except Exception as e:
+    print("เกิดข้อผิดพลาด:", e)
+    
 root = ctk.CTk()
 folder_path = os.path.dirname(os.path.realpath(__file__))
 
