@@ -42,8 +42,8 @@ except Exception as e:
 root = ctk.CTk()
 folder_path = os.path.dirname(os.path.realpath(__file__))
 
-path_Yolo = os.path.join(folder_path, "modules\modelYolo.onnx")
-path_RTDETR = os.path.join(folder_path, "modules\ModelRT.pt")
+path_Yolo = os.path.join(folder_path, "models\modelYolo.onnx")
+path_RTDETR = os.path.join(folder_path, "models\ModelRT.pt")
 
 model_Yolo = YOLO(path_Yolo,task='detect')
 model_RTDETR = YOLO(path_RTDETR)
@@ -66,7 +66,7 @@ frame_counter_e =active_frame_count_e = 0
 frame_counter_f =active_frame_count_f = 0
 frame_counter_g =active_frame_count_g = 0
 interval = 5
-Face_path = os.path.join(folder_path, "Face_reg")
+Face_path = os.path.join(folder_path, "database")
 image_count  = 0
 home_frame = second_frame = Third_frame = None
 entry_name = entry_password_sitting = url_now = ""
@@ -75,7 +75,7 @@ Additional = None
 
 def load_image():
     global images_logos
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
     images_logos["logo_BG_image"] = ctk.CTkImage(
         Image.open(os.path.join(image_path, "bg_gradient.jpg")), size=(1080, 1080)
     )
@@ -199,7 +199,7 @@ def show_frame(frame_name):
 def find_known_face_names():
     global image_count
     folder_path = os.path.dirname(os.path.realpath(__file__))
-    Face_path = os.path.join(folder_path, "Face_reg")
+    Face_path = os.path.join(folder_path, "database")
 
     for filename in os.listdir(Face_path):
         image_count += 1
@@ -267,7 +267,7 @@ def toggle_camera_r():
         running_r = True
         cap_r = cv2.VideoCapture(0)  
         folder_path = os.path.dirname(os.path.realpath(__file__))
-        Face_path = os.path.join(folder_path, "Face_reg")
+        Face_path = os.path.join(folder_path, "database")
         thread_r = threading.Thread(
             target=show_frame_r, args=(label_r, Face_path, interval)
         )
@@ -297,7 +297,7 @@ def detect_yolo(frame):
         print(f"snake_count : {snake_count}")
         if snake_count == 10:
             
-            img_folder = os.path.join(folder_path, "img-cap")
+            img_folder = os.path.join(folder_path, "snapshots")
             img_snake = os.path.join(img_folder, f"snake_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_snake, frame)
             file = {'imageFile':open(img_snake,'rb')}
@@ -317,7 +317,7 @@ def detect_yolo(frame):
         print(f"personfall_count : {personfall_count}")
         if personfall_count == 30: 
             
-            img_folder = os.path.join(folder_path, "img-cap")
+            img_folder = os.path.join(folder_path, "snapshots")
             img_person = os.path.join(img_folder, f"personfall_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_person, frame)
             file = {'imageFile':open(img_person,'rb')}
@@ -336,7 +336,7 @@ def detect_yolo(frame):
         print(f"vomit_count : {vomit_count}")
         if vomit_count == 3: 
             
-            img_folder = os.path.join(folder_path, "img-cap")
+            img_folder = os.path.join(folder_path, "snapshots")
             img_vomit = os.path.join(img_folder, f"vomit_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_vomit, frame)
             file = {'imageFile':open(img_vomit,'rb')}
@@ -383,7 +383,7 @@ def face_recog(frame):
             if unknown_frame_count >= 10:
                 if current_time - last_unknown_notified_time > 20:
 
-                    img_folder = os.path.join(folder_path, "img-cap")
+                    img_folder = os.path.join(folder_path, "snapshots")
                     img_unknow = os.path.join(img_folder, f"Unknow_{int(time.time())}.jpg")
                     frame_rgb = frame[:, :, ::-1]
                     cv2.imwrite(img_unknow, frame_rgb)
@@ -410,7 +410,7 @@ def face_recog(frame):
             if known_frame_count >= 10:
                 if current_time - last_known_notified_time > 10:
                     
-                    img_folder = os.path.join(folder_path, "img-cap")
+                    img_folder = os.path.join(folder_path, "snapshots")
                     img_know = os.path.join(img_folder, f"Known_{name}_{int(time.time())}.jpg")
                     frame_rgb = frame[:, :, ::-1]
                     cv2.imwrite(img_know, frame_rgb)
@@ -1091,7 +1091,7 @@ def show_camera_b_value():
 def find_names():
     global All_name
     folder_path = os.path.dirname(os.path.realpath(__file__))
-    Face_path = os.path.join(folder_path, "Face_reg")
+    Face_path = os.path.join(folder_path, "database")
     for filename in os.listdir(Face_path):
         if filename.endswith(".jpg"):
             name_without_extension = os.path.splitext(filename)[0]   
@@ -1236,7 +1236,7 @@ def save_image_b():
             filename = entry_name.get()
             if filename:
                 folder_path = os.path.dirname(os.path.realpath(__file__))
-                Face_path = os.path.join(folder_path, "Face_reg")
+                Face_path = os.path.join(folder_path, "database")
                 full_filename = os.path.join(Face_path, f"{filename}.jpg")
                 if os.path.exists(filename):
                     label_r.configure(text="File already exists! Choose another name.") 
@@ -1272,7 +1272,7 @@ def delete_image_face():
             for ext in [".jpg", ".jpeg"]:
                 file_path = os.path.join(
                     os.path.dirname(os.path.realpath(__file__)),  
-                    "Face_reg",  
+                    "database",  
                     f"{filename}{ext}", 
                 )
                 if os.path.exists(file_path):
@@ -1291,7 +1291,7 @@ def delete_image_sitting():
         if messagebox.askokcancel(
             "Delete !!!", f"Do you really want to delete {filename}?"):
             for ext in [".jpg", ".jpeg"]:
-                file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Face_reg",  f"{filename}{ext}")
+                file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"database",  f"{filename}{ext}")
                 print(file_path)
                 if os.path.exists(file_path):
                     os.remove(file_path)
@@ -2117,7 +2117,7 @@ def Additional_Detection_1():
 
     Additional.geometry(f"{screen_width}x{screen_height}")
 
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
     logo_KMITL_image = ctk.CTkImage(
         Image.open(os.path.join(image_path, "KMITL-Photoroom.png")), size=(130, 130)
@@ -2196,7 +2196,7 @@ def additional_Detection_2():
     Additional.geometry(f"{screen_width}x{screen_height}")
 
     
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
     
     logo_KMITL_image = ctk.CTkImage(
@@ -2293,7 +2293,7 @@ def additional_Detection_3():
     Additional.geometry(f"{screen_width}x{screen_height}")
 
     
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
     
     logo_KMITL_image = ctk.CTkImage(
@@ -2404,7 +2404,7 @@ def additional_Detection_4():
     Additional.geometry(f"{screen_width}x{screen_height}")
 
     
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
     
     logo_KMITL_image = ctk.CTkImage(
@@ -2536,7 +2536,7 @@ def additional_Detection_5():
     Additional.geometry(f"{screen_width}x{screen_height}")
 
     
-    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Public")
+    image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
     
     logo_KMITL_image = ctk.CTkImage(
