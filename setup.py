@@ -19,36 +19,40 @@ def install_libs():
         "tqdm",
         "psutil",
         "yaspin",
-        "alive-progress",
+        # "alive-progress",
         "asciimatics",
         "questionary",
         "emoji",
-        "py-term",
+        # "py-term",
         "pytermgui",
         "blessed",
         "prompt_toolkit",
-        "pyinquirer",
-        "windows-curses",
+        # "pyinquirer",
+        # "windows-curses",
         "colr",
         "halo",
         "progress",
-        "lorem-text",
-        "image-to-ascii",
-        "pycairo",
+        # "lorem-text",
+        # "image-to-ascii",
+        # "pycairo",
         "colored",
         "cursor",
     ]
     missing_libs = [
         lib for lib in required_libs if importlib.util.find_spec(lib) is None
     ]
-
+    # alive-progress, py-term, pyinquirer, windows-curses, lorem-text, image-to-ascii, pycairo...
     if missing_libs:
         print(
             f"\033[93m📦 Installing missing libraries: {', '.join(missing_libs)}...\033[0m"
         )
-        subprocess.run(
-            [sys.executable, "-m", "pip", "install"] + missing_libs, check=True
-        )
+        try:
+            subprocess.run(
+                [sys.executable, "-m", "pip", "install"] + missing_libs, check=True
+            )
+        except subprocess.CalledProcessError as e:
+            console.print(f"[red]❌ Failed to install libraries: {e}[/red]")
+
         print("\033[92m✅ All required libraries are installed!\033[0m")
     else:
         print("\033[92m✅ All required libraries are already installed!\033[0m")
@@ -88,6 +92,10 @@ from halo import Halo
 import cursor
 from colored import fg, bg, attr
 
+try:
+    import winsound  # สำหรับเสียงพิมพ์ดีดใน Windows
+except ImportError:
+    winsound = None
 colorama.init()
 
 GREEN = "\033[92m"
@@ -139,7 +147,7 @@ def asciimatics_splash(text="SUPER SYSTEM", duration=3):
 
 def display_epic_header():
     try:
-        asciimatics_splash("SUPER SETUP", 3)
+        asciimatics_splash("SUPER SETUP", 100)
     except Exception:
         header = pyfiglet.figlet_format("SUPER SETUP", font="slant")
         console.print(f"[bold magenta]{header}[/bold magenta]")
@@ -157,7 +165,7 @@ def display_epic_header():
             ),
             border_style="bright_blue",
             title="[bold red]🔥 ULTIMATE SETUP 🔥[/bold red]",
-            subtitle="[bold green]v3.0 Ultra Edition[/bold green]",
+            subtitle=f"[bold green]v3.0 Ultra Edition Start at {datetime.now().strftime('%H:%M:%S')}[/bold green]",
         )
     )
 
@@ -191,6 +199,34 @@ def fancy_progress(text, duration=3, style="pulse"):
 
 
 def display_system_info():
+    """
+    Displays detailed system information and compatibility checks.
+    This function gathers and displays information about the system's 
+    operating system, CPU, memory, disk, GPU (if available), and Python 
+    version. It also evaluates the system's compatibility against minimum 
+    and recommended specifications.
+    The output is formatted using the `rich` library to display a table 
+    and messages with styled text.
+    Key Features:
+    - Displays operating system name, version, and compatibility status.
+    - Displays CPU model, usage percentage, and status.
+    - Displays memory size, usage percentage, and status.
+    - Displays disk size, usage percentage, and status.
+    - Checks for GPU availability, CUDA version, and compatibility.
+    - Displays Python version and compatibility status.
+    - Evaluates system compatibility against minimum and recommended 
+      specifications for Windows and Linux systems.
+    Compatibility Criteria:
+    - Minimum and recommended specifications are defined based on the 
+      operating system.
+    - For Windows, specifications include CPU, RAM, storage, and GPU.
+    - For Linux, specifications include CPU, RAM, and storage.
+    Raises:
+        None
+    Note:
+        - Requires the `rich`, `psutil`, and `torch` libraries.
+        - GPU compatibility is checked using PyTorch's CUDA support.
+    """
     console.print(
         Panel("[bold blue]📊 SYSTEM INFORMATION[/bold blue]", border_style="blue")
     )
@@ -295,12 +331,16 @@ def display_system_info():
 
 
 def setup_folders():
-    fancy_progress("Creating essential folders", 3, "pulse")
+    fancy_progress("Creating essential folders", 100, "pulse")
 
     folders = {
         "📁 Database": "database",
         "📷 Snapshots": "snapshots",
+        "🗄️ Logs": "logs",
+        "⚙️ Configs": "configs",
+        "🛠️ Tools": "tools",
     }
+
 
     now_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -333,7 +373,7 @@ def setup_folders():
 
 
 def cleanup_temp_files():
-    fancy_progress("Cleaning temporary files", 2, "yaspin")
+    fancy_progress("Cleaning temporary files", 10, "yaspin")
 
     now_path = os.path.dirname(os.path.realpath(__file__))
     temp_folders = [
@@ -382,7 +422,7 @@ def cleanup_temp_files():
 
 
 def check_dependencies():
-    fancy_progress("Checking Python packages", 2, "halo")
+    fancy_progress("Checking Python packages", 1000, "pulse")  # yaspin, pulse ,halo
 
     packages = [
         "certifi",
@@ -479,7 +519,7 @@ def check_dependencies():
 
 
 def finalize_setup():
-    fancy_progress("Finalizing super amazing setup", 3, "pulse")
+    fancy_progress("Finalizing super amazing setup", 50, "halo")
 
     with Progress() as progress:
         task = progress.add_task("[magenta]Finalizing...", total=100)
@@ -567,5 +607,107 @@ def main():
         cursor.show()
 
 
+def animated_text(text, duration=2, interval=0.5):
+    console.print(
+        Panel(
+            Align.center(Text(text, style=f"bold")),
+            border_style="bright_blue",
+            title="[bold red]🔥 SETUP 🔥[/bold red]",
+            subtitle="[bold green] 🔧 Preparing Environment... [/bold green]",
+            width=50,
+        ),
+        justify="center",
+    )
+
+
+MATRIX_FAIL = (
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "abcdefghijklmnopqrstuvwxyz"
+    "!@#$%^&*()_+=-{}[]<>?/|\\"
+    "ΣΨΩΞΘЖФДБЙКЛПГМТ"
+    "カタカナ ひらがな"
+    "∑√π∝∞Ωµλ⊗⊕"
+)
+
+MATRIX_CHARS = "01 10 0011 1100 1010 0110 1001 0101"
+
+MATRIX_SYMBOLS = "░▒▓█▄▀■●◆★✦✧☠︎☢︎☣︎⚠︎"
+
+
+def play_typing_sound():
+    """เล่นเสียงพิมพ์ดีด (เฉพาะ Linux/macOS)"""
+    if sys.platform != "win32":
+        os.system("play -q typewriter.wav &")  # ต้องมีไฟล์เสียง typewriter.wav
+
+
+if platform.system() == "Windows":
+    import winsound
+
+    def beep():
+        winsound.Beep(random.randint(600, 1000), 50)
+else:
+    def beep():
+        sys.stdout.write("\a")  # ใช้ '\a' เพื่อทำเสียง beep บน Linux/macOS
+        sys.stdout.flush()
+
+# อักขระที่ใช้สุ่ม Glitch
+GLITCH_CHARS = "▓▒█░◆▲■●☆☠︎⚠︎∑ΨΩΞΘЖカタカナ"
+
+def hacker_typing_effect(text, delay=0.05, glitch=True):
+    """แสดงข้อความแบบพิมพ์ทีละตัวอักษร คล้ายในหนังแฮ็กเกอร์"""
+    output = ""
+    for char in text:
+        if glitch and random.random() < 0.2:
+            char = random.choice(GLITCH_CHARS)  # สุ่มตัวอักษรผิดพลาด
+
+        color = "bold green" if random.random() > 0.5 else "bold red"
+        output += f"[{color}]{char}[/{color}]"
+
+        # ล้างบรรทัดเดิมก่อนพิมพ์ใหม่
+        sys.stdout.write("\r" + " " * console.width + "\r")
+        console.print(output, end="")
+
+        beep()  # เล่นเสียง Beep
+        time.sleep(random.uniform(delay * 0.5, delay * 1.5))
+
+    print()
+
+
+
+def hacker_loading_bar(duration=2):
+    """แสดงแถบโหลดสไตล์แฮ็กเกอร์"""
+    console = Console()
+    with Progress() as progress:
+        task = progress.add_task("[bold green]Accessing Secure Files.....", total=100)
+        for _ in range(100):
+            progress.update(task, advance=1)
+            time.sleep(duration / 100)
+
+
+def matrix_effect(lines=20, duration=5):
+    """เอฟเฟกต์ตัวอักษรสุ่มไหลลงมาแบบ Matrix"""
+    width = shutil.get_terminal_size().columns
+    start_time = time.time()
+
+    while time.time() - start_time < duration:
+        line = "".join(
+            random.choice(MATRIX_SYMBOLS + MATRIX_CHARS + MATRIX_FAIL)
+            for _ in range(width)
+        )
+        console.print(line, style="bright_green")
+        time.sleep(0.05)
+
+    console.clear()
+
+
 if __name__ == "__main__":
+    os.system("cls" if os.name == "nt" else "clear")  # ล้างหน้าจอก่อนเริ่ม
+    hacker_text = pyfiglet.figlet_format("SYSTEM OVERRIDE", font="epic")
+    console.print(f"[bold green]\n █ 🟢 🔰 🟢 █ \n {hacker_text} \n █ 🟢 🔰 🟢 █ \n[/bold green]")
+    hacker_typing_effect("🔓 [ ACCESS GRANTED ] Initializing system... 🤖", delay=0.3, glitch=True)
+    matrix_effect()
+    hacker_loading_bar(2)
+    animated_text("🛠️ Config File Setup", duration=5)
+    hacker_typing_effect("⚙️ Loading Super Setup... 💾\n", delay=0.02)
     main()
+
