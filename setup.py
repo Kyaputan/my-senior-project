@@ -7,7 +7,7 @@ import platform
 import shutil
 import random
 from datetime import datetime
-
+import string
 
 def install_libs():
     required_libs = [
@@ -655,11 +655,11 @@ else:
 # อักขระที่ใช้สุ่ม Glitch
 GLITCH_CHARS = "▓▒█░◆▲■●☆☠︎⚠︎∑ΨΩΞΘЖカタカナ"
 
-def hacker_typing_effect(text, delay=0.05, glitch=True):
+def hacker_typing_effect(text, delay=0.01, glitch=True):
     """แสดงข้อความแบบพิมพ์ทีละตัวอักษร คล้ายในหนังแฮ็กเกอร์"""
     output = ""
     for char in text:
-        if glitch and random.random() < 0.2:
+        if glitch and random.random() < 0.05:
             char = random.choice(GLITCH_CHARS)  # สุ่มตัวอักษรผิดพลาด
 
         color = "bold green" if random.random() > 0.5 else "bold red"
@@ -701,15 +701,49 @@ def matrix_effect(lines=20, duration=5):
 
     console.clear()
 
+def generate_password(length=16, fail_chance=0.99, first_try=True):
+    """ สุ่มรหัสผ่านที่ดูเป็น Hacker Style และมีโอกาสเจนล้มเหลว 70% หลังจากรอบแรก """
+    if not first_try and random.random() < fail_chance:
+        return None  # จำลองการสร้างรหัสผ่านล้มเหลว
+
+    chars = string.ascii_letters + string.digits + "!@#$%^&*()_+=-{}[]<>?/|\\"
+    return ''.join(random.choice(chars) for _ in range(length))
+
+
 
 if __name__ == "__main__":
     os.system("cls" if os.name == "nt" else "clear")  # ล้างหน้าจอก่อนเริ่ม
     hacker_text = pyfiglet.figlet_format("SYSTEM OVERRIDE", font="epic")
     console.print(f"[bold green]\n █ 🟢 🔰 🟢 █ \n {hacker_text} \n █ 🟢 🔰 🟢 █ \n[/bold green]")
+
+    # 🔑 สร้างรหัสผ่านครั้งแรก (ต้องผ่าน 100%)
+    password = generate_password(20, first_try=True)
+    hacker_typing_effect(f"🔑 Generated Password: [ {password} ] ✅\n", delay=0.05)
+
+    # 🔄 ทดสอบเจนใหม่แบบมีโอกาสพลาด
+    hacker_typing_effect("🛠️ Regenerating Secure Password...\n", delay=0.05)
+    password = generate_password(20, fail_chance=0.7, first_try=False)
+
+    if password:
+        hacker_typing_effect(f"🔑 Generated Password: [ {password} ] ✅\n", delay=0.05)
+    else:
+        hacker_typing_effect("❌ Password Generation Failed! Retrying... 🔄\n", delay=0.1, glitch=True)
+        time.sleep(1)  # หน่วงเวลาเหมือนระบบกำลังพยายามใหม่
+        password = generate_password(20, fail_chance=0.05, first_try=False)
+
+        if password:
+            hacker_typing_effect(f"🔑 New Secure Password: [ {password} ] ✅\n", delay=0.05)
+        else:
+            hacker_typing_effect("🚨 SYSTEM ERROR: Password Generation Failed Permanently ❌\n", delay=0.1, glitch=True)
+            exit(1)  # หยุดโปรแกรมเหมือนเกิดข้อผิดพลาดจริง
+
     hacker_typing_effect("🔓 [ ACCESS GRANTED ] Initializing system... 🤖", delay=0.3, glitch=True)
+
     matrix_effect()
     hacker_loading_bar(2)
     animated_text("🛠️ Config File Setup", duration=5)
     hacker_typing_effect("⚙️ Loading Super Setup... 💾\n", delay=0.02)
     main()
+
+
 
