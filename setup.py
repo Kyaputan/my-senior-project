@@ -155,6 +155,8 @@ def display_epic_header():
     try:
         ascii_art = art.art("random")
         console.print(f"[cyan]{ascii_art}[/cyan]")
+        ascii_art = art.art("random")
+        console.print(f"[cyan]{ascii_art}[/cyan]")
     except Exception:
         pass
 
