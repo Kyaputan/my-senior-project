@@ -30,12 +30,10 @@ session = requests.Session()
 try:
     message_Start = {'message': 'ยินดีต้อนรับเข้าสู่ ระบบระวังภัยภายในบ้านพร้อมแจ้งเตือนผ่านแอปพลิเคชันไลน์'}
     START = session.post(url_line, headers=LINE_HEADERS, data=message_Start)
-
     if START.status_code == 200:
         print("ส่งข้อความสำเร็จ:", START.text)
     else:
         print("เกิดข้อผิดพลาด:", START.status_code, START.text)
-
 except Exception as e:
     print("เกิดข้อผิดพลาด:", e)
     
