@@ -20,6 +20,8 @@ if __name__ == "__main__":
         send_line_notification("Hello, World!")
     except Exception as e:
         print(f"An error occurred: {e}")
+        
+
 
 
 

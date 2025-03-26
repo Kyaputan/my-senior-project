@@ -3,7 +3,10 @@ from ultralytics import YOLO
 import os
 import time
 import requests
+from dotenv import load_dotenv
+import time
 
+load_dotenv()
 
 folder_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 models_path = os.path.join(folder_path, "models")
@@ -13,7 +16,7 @@ path_Yolo = os.path.join(models_path, "ModelYolo.onnx")
 model_Yolo = YOLO(path_Yolo , task="detect")
 
 url_line = "https://notify-api.line.me/api/notify"
-TOKEN = "TOKEN_LINE_API"
+TOKEN = os.getenv("API_KEY")
 LINE_HEADERS = {"Authorization": "Bearer " + TOKEN}
 session = requests.Session()
 
@@ -47,6 +50,7 @@ def detect_yolo(frame):
     if snake_found:
         snake_count += 1
         if snake_count == 10:
+            print(f"time Detection : {time.time()}")
             img_snake = os.path.join(snapshots_path, f"snake_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_snake, frame)
 
@@ -54,12 +58,14 @@ def detect_yolo(frame):
             message_S = {'message': 'ตรวจพบสิ่งต้องสงสัยคล้ายงู'}
             session.post(url_line, headers=LINE_HEADERS, files=file, data=message_S)
             snake_count = 0 
+            print(f"time send line : {time.time()}")
     else:
         snake_count = 0
 
     if personfall_found:
         personfall_count += 1
         if personfall_count == 30:
+            print(f"time Detection : {time.time()}")
             img_person = os.path.join(snapshots_path, f"personfall_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_person, frame)
 
@@ -67,12 +73,14 @@ def detect_yolo(frame):
             message_P = {'message': 'ตรวจพบบุคคลที่คาดว่าต้องการความช่วยเหลือ'}
             session.post(url_line, headers=LINE_HEADERS, files=file, data=message_P)
             personfall_count = 0
+            print(f"time send line : {time.time()}")
     else:
         personfall_count = 0
 
     if vomit_found:
         vomit_count += 1
         if vomit_count == 3:
+            print(f"time Detection : {time.time()}")
             img_vomit = os.path.join(snapshots_path, f"vomit_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_vomit, frame)
 
@@ -80,6 +88,7 @@ def detect_yolo(frame):
             message_V = {'message': 'ตรวจพบเด็ก / บุคคลที่คาดว่าไม่สามารถช่วยเหลือตัวเองได้'}
             session.post(url_line, headers=LINE_HEADERS, files=file, data=message_V)
             vomit_count = 0
+            print(f"time send line : {time.time()}")
     else:
         vomit_count = 0
 
@@ -103,3 +112,4 @@ if __name__ == "__main__":
 
     cap.release()
     cv2.destroyAllWindows()
+
