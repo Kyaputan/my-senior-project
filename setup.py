@@ -341,6 +341,7 @@ def setup_folders():
         "🗄️ Logs": "logs",
         "⚙️ Configs": "configs",
         "🛠️ Tools": "tools",
+        "📁 Videos": "Videos",
     }
 
 
