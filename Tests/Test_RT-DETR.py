@@ -1,5 +1,5 @@
 import cv2
-from ultralytics import YOLO
+from ultralytics import RTDETR
 import os
 import time
 import requests
@@ -13,7 +13,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logs/yolo_detection.log'),
+        logging.FileHandler('logs/REDETR_detection.log'),
         logging.StreamHandler()
     ]
 )
@@ -24,8 +24,8 @@ folder_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 models_path = os.path.join(folder_path, "models")
 snapshots_path = os.path.join(folder_path, "snapshots")
 
-path_Yolo = os.path.join(models_path, "ModelYolo.onnx")
-model_Yolo = YOLO(path_Yolo , task="detect")
+path_REDETR = os.path.join(models_path, "ModelRT.pt")
+model_REDETR = RTDETR(path_REDETR)
 
 url_line = "https://notify-api.line.me/api/notify"
 TOKEN = os.getenv("API_KEY")
@@ -37,14 +37,15 @@ snake_count = 0
 personfall_count = 0
 vomit_count = 0
 
-def detect_yolo(frame):
+def detect_REDETR(frame):
     global snake_count, personfall_count, vomit_count
-    start_time = time.time()
     frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+    start_time = time.time()
+    results = model_REDETR.predict(frame, conf=0.2, iou=0.45)
     end_time = time.time()
     inference_time = end_time - start_time
     logging.info(f"Inference time: {inference_time} seconds")
-    results = model_Yolo.predict(frame, conf=0.2, iou=0.45)
+    
     snake_found = False
     personfall_found = False
     vomit_found = False
@@ -123,7 +124,7 @@ def detect_yolo(frame):
 
 
 if __name__ == "__main__":
-    logging.info("Starting YOLO detection system")
+    logging.info("Starting REDETR detection system")
     video_path = os.path.join(folder_path, "Videos", "Video1.mp4")
     logging.info(f"Using video source: {video_path}")
     cap = cv2.VideoCapture(video_path)
@@ -133,8 +134,8 @@ if __name__ == "__main__":
         if not ret:
             logging.warning("Failed to read frame from video")
             break  
-        output_frame = detect_yolo(frame)  
-        cv2.imshow("YOLO Detection", output_frame)
+        output_frame = detect_REDETR(frame)  
+        cv2.imshow("REDETR Detection", output_frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             logging.info("User requested to stop detection")
@@ -142,5 +143,5 @@ if __name__ == "__main__":
 
     cap.release()
     cv2.destroyAllWindows()
-    logging.info("YOLO detection system stopped")
+    logging.info("REDETR detection system stopped")
 
