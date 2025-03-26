@@ -13,12 +13,20 @@ try:
     from queue import Queue
     import numpy as np
     from dotenv import load_dotenv
+    import logging
 except Exception as e:
     print(f"An error occurred: {e}")
 
+logging.basicConfig(
+    filename="logs/main.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    encoding="utf-8", 
+)
+
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
-
 global_selected_quality = ""
 ip_camera_url_1 = ip_camera_url_2 = ip_camera_url_3 = ip_camera_url_4 = ip_camera_url_5 = ip_camera_url_6 = ""
 url_1 = url_2 = url_3 = url_4 = url_5 = url_6 = ""
@@ -27,15 +35,16 @@ url_line = "https://notify-api.line.me/api/notify"
 LINE_HEADERS = {"Authorization":"Bearer "+ API_KEY }
 session = requests.Session()
 
+
 try:
     message_Start = {'message': 'ยินดีต้อนรับเข้าสู่ ระบบระวังภัยภายในบ้านพร้อมแจ้งเตือนผ่านแอปพลิเคชันไลน์'}
     START = session.post(url_line, headers=LINE_HEADERS, data=message_Start)
     if START.status_code == 200:
-        print("ส่งข้อความสำเร็จ:", START.text)
+        logging.info("ส่งข้อความสำเร็จ:", START.text)
     else:
-        print("เกิดข้อผิดพลาด:", START.status_code, START.text)
+        logging.error("เกิดข้อผิดพลาด:", START.status_code, START.text)
 except Exception as e:
-    print("เกิดข้อผิดพลาด:", e)
+    logging.error("เกิดข้อผิดพลาด:", e)
     
 
 
@@ -43,12 +52,16 @@ except Exception as e:
 root = ctk.CTk()
 folder_path = os.path.dirname(os.path.realpath(__file__))
 
-path_Yolo = os.path.join(folder_path, "models\modelYolo.onnx")
-path_RTDETR = os.path.join(folder_path, "models\ModelRT.pt")
+path_Yolo = os.path.join(folder_path, "models", "modelYolo.onnx")
+path_RTDETR = os.path.join(folder_path, "models", "ModelRT.pt")
 
-model_Yolo = YOLO(path_Yolo,task='detect')
-model_RTDETR = YOLO(path_RTDETR)
+try:
+    model_Yolo = YOLO(path_Yolo, task="detect")
+    model_RTDETR = YOLO(path_RTDETR)
 
+    logging.info("สำเร็จการโหลดโมเดล YOLO และ RTDETR")  
+except Exception as e:
+    logging.error(f"เกิดข้อผิดพลาดในการโหลดโมเดล: {e}") 
 
 global selected_value, cap_a, cap_b, cap_r , detection_mode, model_selection , cap_c , cap_d , cap_e , cap_f , cap_g
 snake_count = personfall_count = vomit_count = 0
@@ -214,6 +227,8 @@ def find_known_face_names():
                 encoding_exists = False
                 for known_encoding in known_face_encodings:
                     distance = np.linalg.norm(known_encoding - encoding[0])
+                    logging.info(f"ระยะห่างระหว่างรูปภาพ: {distance}")
+                    logging.info(f"พบใบหน้า : {known_encoding}")
                     if distance < 0.6:
                         encoding_exists = True
                         break
@@ -221,16 +236,16 @@ def find_known_face_names():
                 if not encoding_exists:
                     known_face_images.append(image)
                     known_face_encodings.append(encoding[0])
-
                     name = os.path.splitext(filename)[0]
                     known_face_names.append(name)
                     time.sleep(0.1)
 
     if len(known_face_names) == 0:   
         messagebox.showerror("Error", "No Face input received")
+        logging.error("ไม่พบรูปภาพหน้าตัว")
     else:
         print(f"รู้จักบุคคลจำนวน {len(known_face_names)} คน: {known_face_names}")
-
+        logging.info(f"รู้จักบุคคลจำนวน {len(known_face_names)} คน: {known_face_names}")
     print(f"จำนวนรูปภาพในโฟลเดอร์: {image_count} รูป")
 
 
@@ -308,7 +323,7 @@ def detect_yolo(frame):
             S = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_S)
             time.sleep(0.3)
             print(S.text)
-
+            logging.info(f"ส่งข้อความสำเร็จ: {S.text}")
             snake_count = 0
     else:
         snake_count = 0
@@ -323,11 +338,11 @@ def detect_yolo(frame):
             cv2.imwrite(img_person, frame)
             file = {'imageFile':open(img_person,'rb')}
             message_P = {'message': 'ตรวจพบบุคคลที่คาดว่าต้องการความช่วยเหลือ'}
-            
             time.sleep(0.3)
             P = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_P)
             time.sleep(0.3)
             print(P.text)
+            logging.info(f"ส่งข้อความสำเร็จ: {P.text}")
             personfall_count = 0 
     else:
         personfall_count = 0 
@@ -347,6 +362,7 @@ def detect_yolo(frame):
             V = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_V)
             time.sleep(0.3)
             print(V.text)
+            logging.info(f"ส่งข้อความสำเร็จ: {V.text}")
             vomit_count = 0   
     else:
         vomit_count = 0 
@@ -396,6 +412,7 @@ def face_recog(frame):
                         b = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_b)
                         time.sleep(0.3)
                         print(b.text)
+                        logging.info(f"ส่งข้อความสำเร็จ: {b.text}")
                     except Exception as e:
                         print(f"เกิดข้อผิดพลาด: {e}")
                     unknown_frame_count = 0
@@ -423,6 +440,7 @@ def face_recog(frame):
                         r = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_r)
                         time.sleep(0.3)
                         print(r.text)
+                        logging.info(f"ส่งข้อความสำเร็จ: {r.text}")
                     except Exception as e:
                         print(f"เกิดข้อผิดพลาด: {e}")
                     known_frame_count = 0
@@ -505,8 +523,8 @@ def toggle_camera_a():
     global running_a, cap_a
     if detection_mode.get() == "Face_Recognition" and len(known_face_names) == 0:
         messagebox.showerror(
-            "Error", "No known faces available. Please add known faces first."
-        )
+            "Error", "No known faces available. Please add known faces first.")
+        logging.error("ไม่พบรูปภาพหน้า")
         return
     if running_a:
         running_a = False
@@ -527,6 +545,7 @@ def toggle_camera_b():
         messagebox.showerror(
             "Error", "No known faces available. Please add known faces first."
         )
+        logging.error("ไม่พบรูปภาพหน้า")
         return
     if running_b:
         running_b = False
@@ -1786,9 +1805,10 @@ def input_dialog_Address_1():
     if address_1:
         ip_camera_url_1 = address_1
         print("Address :", ip_camera_url_1)
+        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 1: {ip_camera_url_1}")
     else:
         print("No address input received")
-
+        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 1")
 
 def input_dialog_Address_2():
     global ip_camera_url_2
@@ -1797,9 +1817,10 @@ def input_dialog_Address_2():
     if address_2:
         ip_camera_url_2 = address_2
         print("Address :", ip_camera_url_2)
+        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 2: {ip_camera_url_2}")
     else:
         print("No address input received")
-
+        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 2")
 
 def input_dialog_Address_3():
     global ip_camera_url_3
@@ -1808,8 +1829,10 @@ def input_dialog_Address_3():
     if address_3:
         ip_camera_url_3 = address_3
         print("Address :", ip_camera_url_3)
+        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 3: {ip_camera_url_3}")
     else:
         print("No address input received")
+        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 3")
 
 
 def input_dialog_Address_4():
@@ -1819,8 +1842,10 @@ def input_dialog_Address_4():
     if address_4:
         ip_camera_url_4 = address_4
         print("Address :", ip_camera_url_4)
+        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 4: {ip_camera_url_4}")
     else:
         print("No address input received")
+        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 4")
 
 
 def input_dialog_Address_5():
@@ -1830,8 +1855,10 @@ def input_dialog_Address_5():
     if address_5:
         ip_camera_url_5 = address_5
         print("Address :", ip_camera_url_5)
+        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 5: {ip_camera_url_5}")
     else:
         print("No address input received")
+        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 5")
 
 
 def input_dialog_Address_6():
@@ -1841,8 +1868,10 @@ def input_dialog_Address_6():
     if address_6:
         ip_camera_url_6 = address_6
         print("Address :", ip_camera_url_6)
+        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 6: {ip_camera_url_6}")
     else:
         print("No address input received")
+        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 6")
 
 
 def combine_button_1():
@@ -1854,7 +1883,6 @@ def combine_button_1():
         password = entry_password_sitting.get() 
         url_1 = f'rtsp://{name}:{password}@{ip_camera_url_1}:554/{global_selected_quality}'
         print("Address:", url_1)
-
         url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_1}")
     else:
         print("No address input received")
@@ -1947,11 +1975,8 @@ def combine_button_6():
 
 def exit_program():
     if messagebox.askokcancel("Exit", "Do you really want to exit?"):
-        root.destroy()  
-
-
-def credit():
-    messagebox.showinfo("Credit", "Credits: Your Name")
+        root.destroy() 
+        logging.info("กำลังปิดโปรแกรม")
 
 
 def change_appearance_mode_event(new_appearance_mode: str):
@@ -2080,16 +2105,6 @@ def Main_window():
     )
     setting_button.pack(pady=10)
 
-    credit_button = ctk.CTkButton(
-        menu_frame,
-        text="Credit",
-        fg_color=("#E35205", "#C24504"),
-        hover_color="#757575",
-        border_color="#333333",
-        command=credit,
-        **button_style,
-    )
-    credit_button.pack(pady=10)
 
     exit_button = ctk.CTkButton(
         menu_frame,
@@ -2700,9 +2715,10 @@ def exit_Additional():
 
 if __name__ == "__main__":
     try:
+        logging.info("กำลังเริ่มต้นการทำงานของโปรแกรม")
         Main_window()
     except Exception as e:
-        print(e)
+        logging.error(f"เกิดข้อผิดพลาด: {e}")
         messagebox.showerror("Error", "An error occurred while running the program.")
         exit_program()
 

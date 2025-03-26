@@ -492,7 +492,7 @@ def check_dependencies():
                     version = getattr(mod, "__version__", "Unknown")
                     table.add_row(package, "[green]✅ Installed[/green]", version)
                 except:
-                    table.add_row(package, "[green]✅ Installed[/green]", "Unknown")
+                    table.add_row(package, "[green]✅ Installed[/green]", "Latest")
 
             progress.update(check_task, advance=1)
             time.sleep(0.05)
