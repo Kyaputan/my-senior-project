@@ -12,18 +12,21 @@ try:
     import requests
     from queue import Queue
     import numpy as np
+    from dotenv import load_dotenv
 except Exception as e:
     print(f"An error occurred: {e}")
 
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 
 global_selected_quality = ""
 ip_camera_url_1 = ip_camera_url_2 = ip_camera_url_3 = ip_camera_url_4 = ip_camera_url_5 = ip_camera_url_6 = ""
 url_1 = url_2 = url_3 = url_4 = url_5 = url_6 = ""
 
 url_line = "https://notify-api.line.me/api/notify"
-TOKEN = "TOKEN_LINE_API"
-LINE_HEADERS = {"Authorization":"Bearer "+TOKEN}
+LINE_HEADERS = {"Authorization":"Bearer "+ API_KEY }
 session = requests.Session()
+
 try:
     message_Start = {'message': 'ยินดีต้อนรับเข้าสู่ ระบบระวังภัยภายในบ้านพร้อมแจ้งเตือนผ่านแอปพลิเคชันไลน์'}
     START = session.post(url_line, headers=LINE_HEADERS, data=message_Start)

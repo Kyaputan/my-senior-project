@@ -437,6 +437,7 @@ def check_dependencies():
         "cycler",
         "darkdetect",
         "dlib",
+        "dotenv",
         "face_recognition",
         "face_recognition_models",
         "filelock",
