@@ -15,6 +15,9 @@ now_path = os.path.dirname(os.path.realpath(__file__))
 # Paths for the folders
 folder_1_path = os.path.join(now_path, folder_1)
 folder_2_path = os.path.join(now_path, folder_2)
+folder_3_path = os.path.join(now_path, folder_3)
+folder_4_path = os.path.join(now_path, folder_4)
+
 
 # Function to print styled messages with bigger, bolder, colorful text
 def print_styled(message, style="bold"):
@@ -44,7 +47,18 @@ if not os.path.exists(folder_2_path):
 else:
     print_styled(f"FOLDER {folder_2_path} ALREADY EXISTS. SKIPPING CREATION.", "blue")
 
-# Installing dependencies from requirements.txt with more emphasis
+if not os.path.exists(folder_3_path):
+    os.makedirs(folder_3_path)
+    print_styled(f"CREATED FOLDER: {folder_3} AT {now_path}", "green")
+else:
+    print_styled(f"FOLDER {folder_3_path} ALREADY EXISTS. SKIPPING CREATION.", "blue")
+
+if not os.path.exists(folder_4_path):
+    os.makedirs(folder_4_path)
+    print_styled(f"CREATED FOLDER: {folder_4} AT {now_path}", "green")
+else:
+    print_styled(f"FOLDER {folder_4_path} ALREADY EXISTS. SKIPPING CREATION.", "blue")
+
 def install_requirements():
     if os.path.exists('requirements.txt'):
         print_styled("INSTALLING DEPENDENCIES FROM requirements.txt", "yellow")
