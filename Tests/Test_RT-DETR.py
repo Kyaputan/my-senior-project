@@ -40,11 +40,7 @@ vomit_count = 0
 def detect_REDETR(frame):
     global snake_count, personfall_count, vomit_count
     frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
-    start_time = time.time()
     results = model_REDETR.predict(frame, conf=0.2, iou=0.45)
-    end_time = time.time()
-    inference_time = end_time - start_time
-    logging.info(f"Inference time: {inference_time} seconds")
     
     snake_found = False
     personfall_found = False
@@ -128,9 +124,14 @@ if __name__ == "__main__":
     video_path = os.path.join(folder_path, "Videos", "Video1.mp4")
     logging.info(f"Using video source: {video_path}")
     cap = cv2.VideoCapture(video_path)
-
+    # cap = cv2.VideoCapture("rtsp://Rachata:12461246@192.168.0.101:554/stream1")
+    now = time.time()
+    format_time = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
+    logging.info(f"Start at : {format_time}")
+    
     while cap.isOpened():
         ret, frame = cap.read()
+
         if not ret:
             logging.warning("Failed to read frame from video")
             break  
