@@ -40,11 +40,11 @@ try:
     message_Start = {'message': 'ยินดีต้อนรับเข้าสู่ ระบบระวังภัยภายในบ้านพร้อมแจ้งเตือนผ่านแอปพลิเคชันไลน์'}
     START = session.post(url_line, headers=LINE_HEADERS, data=message_Start)
     if START.status_code == 200:
-        logging.info("ส่งข้อความสำเร็จ:", START.text)
+        logging.info(f"ส่งข้อความสำเร็จ: {START.status_code}")
     else:
-        logging.error("เกิดข้อผิดพลาด:", START.status_code, START.text)
+        logging.error(f"เกิดข้อผิดพลาด: {START.status_code}")
 except Exception as e:
-    logging.error("เกิดข้อผิดพลาด:", e)
+    logging.error(f"เกิดข้อผิดพลาด: {e}")
     
 
 
@@ -889,6 +889,7 @@ def start():
     screen_width = Start_window.winfo_screenwidth() / 2
     screen_height = Start_window.winfo_screenheight() / 2
     Start_window.geometry(f"{screen_width}x{screen_height}")
+    Start_window.resizable(False, False)
     load_image()
  
     bg_image_label = ctk.CTkLabel(
@@ -1258,6 +1259,8 @@ def save_image_b():
                 folder_path = os.path.dirname(os.path.realpath(__file__))
                 Face_path = os.path.join(folder_path, "database")
                 full_filename = os.path.join(Face_path, f"{filename}.jpg")
+                logging.info(f"Image saved at: {full_filename}")
+                logging.info(f"By : {filename}")
                 if os.path.exists(filename):
                     label_r.configure(text="File already exists! Choose another name.") 
                     return
@@ -1277,11 +1280,11 @@ def countdown(count):
         label_r.configure(
             text=f"Saving in {count}...",
             text_color="yellow",
-            font=ctk.CTkFont(size=18, weight="bold"),
-        ) 
+            font=ctk.CTkFont(size=18, weight="bold"),) 
         label_r.after(1000, countdown, count - 1)
     else:
         save_image_b()
+        logging.info("Save Image Success")
 
 
 def delete_image_face():
@@ -1977,6 +1980,7 @@ def exit_program():
     if messagebox.askokcancel("Exit", "Do you really want to exit?"):
         root.destroy() 
         logging.info("กำลังปิดโปรแกรม")
+        logging.info("=========================================================================")
 
 
 def change_appearance_mode_event(new_appearance_mode: str):
@@ -2721,6 +2725,7 @@ if __name__ == "__main__":
         logging.error(f"เกิดข้อผิดพลาด: {e}")
         messagebox.showerror("Error", "An error occurred while running the program.")
         exit_program()
+        logging.info("=========================================================================")
 
 
 
