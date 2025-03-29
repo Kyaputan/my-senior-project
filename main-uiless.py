@@ -39,11 +39,11 @@ try:
     message_Start = {'message': 'ยินดีต้อนรับเข้าสู่ ระบบระวังภัยภายในบ้านพร้อมแจ้งเตือนผ่านแอปพลิเคชันไลน์ รูปแบบ UI LESS'}
     START = session.post(url_line, headers=LINE_HEADERS, data=message_Start)
     if START.status_code == 200:
-        logging.info(f"ส่งข้อความสำเร็จ: {START.status_code}")
+        logging.info(f"Send message success: {START.status_code}")
     else:
-        logging.error(f"เกิดข้อผิดพลาด: {START.status_code}")
+        logging.error(f"Error: {START.status_code}")
 except Exception as e:
-    logging.error(f"เกิดข้อผิดพลาด: {e}")
+    logging.error(f"Error: {e}")
 
 
 snake_count = 0
