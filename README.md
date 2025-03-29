@@ -33,6 +33,7 @@ This project aims to develop an event detection system using Computer Vision tec
 
 ---  
 
+
 ## 🚀 Installation  
 
 ### 1️⃣ Clone the Repository  
@@ -41,25 +42,24 @@ git clone https://github.com/Kyaputan/my-senior-project.git
 cd my-senior-project  
 ```  
 
-### 2️⃣ Install Dependencies  
-```bash  
-pip install -r requirements.txt  
-```  
+### 2️⃣ Configure API Keys  
+Before running the setup, update your `.env` file with the necessary API keys for the system to function correctly.  
 
 ### 3️⃣ Run the Setup  
 - **For Raspberry Pi**  
-  ```bash  
+  ```bash
+  sudo apt update  
+  sudo apt install ntp  
+  sudo timedatectl set-ntp true  
+  sudo apt install cmake
   python setup-pi.py  
   ```    
 - **For Windows**  
   ```bash  
   python setup-Window.py  
   ```    
-### 4️⃣ Configure API Keys  
-Before running the setup, update your `env` file with the necessary API keys for the system to function correctly.  
-.
 
-### 5️⃣ Run the System  
+### 4️⃣ Run the System  
 - **With GUI**  
   ```bash  
   python main-ui.py  
@@ -68,6 +68,7 @@ Before running the setup, update your `env` file with the necessary API keys for
   ```bash  
   python main-uiless.py  
   ```
+
 
 ---  
 
