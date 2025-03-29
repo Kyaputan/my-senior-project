@@ -35,23 +35,39 @@ This project aims to develop an event detection system using Computer Vision tec
 
 ## 🚀 Installation  
 
-1. Clone the repository:  
-   ```bash  
-   git clone https://github.com/Kyaputan/my-senior-project.git
-   cd event-detection-system  
-   ```  
-2. Install dependencies:  
-   ```bash  
-   pip install -r requirements.txt  
-   ```
-4. Run the setup:  
-   ```bash  
-   python setup.py  
-   ```  
-5. Run the system:  
-   ```bash  
-   python main.py  
-   ```  
+### 1️⃣ Clone the Repository  
+```bash  
+git clone https://github.com/Kyaputan/my-senior-project.git  
+cd my-senior-project  
+```  
+
+### 2️⃣ Install Dependencies  
+```bash  
+pip install -r requirements.txt  
+```  
+
+### 3️⃣ Run the Setup  
+- **For Raspberry Pi**  
+  ```bash  
+  python setup-pi.py  
+  ```    
+- **For Windows**  
+  ```bash  
+  python setup-Window.py  
+  ```    
+### 4️⃣ Configure API Keys  
+Before running the setup, update your `env` file with the necessary API keys for the system to function correctly.  
+.
+
+### 5️⃣ Run the System  
+- **With GUI**  
+  ```bash  
+  python main-ui.py  
+  ```    
+- **Without GUI**  
+  ```bash  
+  python main-uiless.py  
+  ```
 
 ---  
 
