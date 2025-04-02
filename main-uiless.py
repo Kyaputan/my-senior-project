@@ -234,7 +234,7 @@ def Selet_model():
 
 def Selet_camera():
     while True:
-        num = input("เลือกกล้อง (1 = กล้องเว็บแคม, 2 = RTSP, exit = ออกจากโปรแกรม): ").strip()
+        num = input("เลือกกล้อง (1 = กล้องเว็บแคม, 2 = RTSP, 3 = IP Camera,exit = ออกจากโปรแกรม): ").strip()
         if num == "1":
             logging.info("Selected camera: WebCam")
             return 0
@@ -246,6 +246,13 @@ def Selet_camera():
             rtsp_url = f"rtsp://{username}:{password}@{ip}:554/stream1"
             logging.info(f"RTSP URL: {rtsp_url}")
             return rtsp_url
+        elif num == "3":
+            logging.info("Selected camera: IP Camera")
+            ip = input("กรุณาใส่ IP ของกล้อง: ").strip()
+            port = input("กรุณาใส่ Port ของกล้อง: ").strip()
+            url = f"http://{ip}:{port}/video"
+            logging.info(f"IP Camera URL: {url}")
+            return url
         elif num.lower() == "exit":
             logging.info("Exiting the program...")
             exit()
