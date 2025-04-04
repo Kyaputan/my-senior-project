@@ -13,7 +13,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('../logs/yolo_detection.log'),
+        logging.FileHandler('../my-senior-project/logs/yolo_detection.log'),
         logging.StreamHandler()
     ]
 )
@@ -122,9 +122,9 @@ if __name__ == "__main__":
     logging.info("Starting YOLO detection system")
     video_path = os.path.join(folder_path, "Videos", "Video1.mp4")
     logging.info(f"Using video source: {video_path}")
-    # cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(video_path)
     # cap = cv2.VideoCapture("rtsp://Rachata:12461246@192.168.0.101:554/stream1")
-    cap = cv2.VideoCapture("http://172.16.11.255:8080/video")
+    # cap = cv2.VideoCapture("http://172.16.11.255:8080/video")
     now = time.time()
     format_time = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
     logging.info(f"Start at : {format_time}")

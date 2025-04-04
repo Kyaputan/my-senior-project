@@ -30,40 +30,60 @@ API_KEY = os.getenv("API_KEY")
 global_selected_quality = ""
 ip_camera_url_1 = ip_camera_url_2 = ip_camera_url_3 = ip_camera_url_4 = ip_camera_url_5 = ip_camera_url_6 = ""
 url_1 = url_2 = url_3 = url_4 = url_5 = url_6 = ""
-
 url_line = "https://notify-api.line.me/api/notify"
 LINE_HEADERS = {"Authorization":"Bearer "+ API_KEY }
 session = requests.Session()
-
-
-try:
-    message_Start = {'message': 'ยินดีต้อนรับเข้าสู่ ระบบระวังภัยภายในบ้านพร้อมแจ้งเตือนผ่านแอปพลิเคชันไลน์'}
-    START = session.post(url_line, headers=LINE_HEADERS, data=message_Start)
-    if START.status_code == 200:
-        logging.info(f"ส่งข้อความสำเร็จ: {START.status_code}")
-    else:
-        logging.error(f"เกิดข้อผิดพลาด: {START.status_code}")
-except Exception as e:
-    logging.error(f"เกิดข้อผิดพลาด: {e}")
-    
-
-
-
 root = ctk.CTk()
 folder_path = os.path.dirname(os.path.realpath(__file__))
-
 path_Yolo = os.path.join(folder_path, "models", "modelYolo.onnx")
 path_RTDETR = os.path.join(folder_path, "models", "ModelRT.pt")
+
+# Send Line
+Send_line = False
+
+
+def send_line(message, image_path=None):
+    if Send_line:
+        try:
+            if image_path:
+                with open(image_path, 'rb') as file:
+                    files = {'imageFile': file}
+                    message_data = {'message': message}
+                    
+                    time.sleep(0.3)  
+                    response = session.post(url_line, headers=LINE_HEADERS, files=files, data=message_data)
+                    
+                    if response.status_code == 200:
+                        logging.info(f"Successfully sent message and image: {response.status_code}")
+                    else:
+                        logging.error(f"Failed to send message and image: {response.status_code}")
+            else:
+                message_data = {'message': message}
+                response = session.post(url_line, headers=LINE_HEADERS, data=message_data)
+
+                if response.status_code == 200:
+                    logging.info(f"Successfully sent message: {response.status_code}")
+                else:
+                    logging.error(f"Failed to send message: {response.status_code}")
+
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+    else:
+        logging.info("Closing message sending")
+        
+
+send_line(message="Welcome to the My-SENIOR-PROJECT")
+
 
 try:
     model_Yolo = YOLO(path_Yolo, task="detect")
     model_RTDETR = YOLO(path_RTDETR)
 
-    logging.info("สำเร็จการโหลดโมเดล YOLO และ RTDETR")  
+    logging.info("Successfully loaded YOLO and RTDETR models")  
 except Exception as e:
-    logging.error(f"เกิดข้อผิดพลาดในการโหลดโมเดล: {e}") 
+    logging.error(f"An error occurred in loading the model: {e}") 
 
-global selected_value, cap_a, cap_b, cap_r , detection_mode, model_selection , cap_c , cap_d , cap_e , cap_f , cap_g
+global selected_value, cap_a, cap_b, cap_r , detection_mode, cap_c , cap_d , cap_e , cap_f , cap_g
 snake_count = personfall_count = vomit_count = 0
 running_a = running_b = running_r = running_c = running_d = running_e = running_f = running_g = False
 known_face_images = []
@@ -185,13 +205,13 @@ def quality_selected(selected_port):
     global global_selected_quality
     global_selected_quality = selected_port
 
-    if selected_port == "เลือกคุณภาพ":
-        print("Selected quality: ไม่มีคุณภาพที่เลือก")
+    if selected_port == "Select Quality":
+        print("Selected quality: No quality selected")
         global_selected_quality = "stream2"
-    elif selected_port == "คุณภาพสูง":
+    elif selected_port == "High Quality":
         print("Selected quality: stream1")
         global_selected_quality = "stream1"
-    elif selected_port == "ประสิทธิภาพสูง":
+    elif selected_port == "High Performance":
         print("Selected quality: stream2")
         global_selected_quality = "stream2"
 
@@ -227,8 +247,6 @@ def find_known_face_names():
                 encoding_exists = False
                 for known_encoding in known_face_encodings:
                     distance = np.linalg.norm(known_encoding - encoding[0])
-                    logging.info(f"ระยะห่างระหว่างรูปภาพ: {distance}")
-                    logging.info(f"พบใบหน้า : {known_encoding}")
                     if distance < 0.6:
                         encoding_exists = True
                         break
@@ -242,11 +260,11 @@ def find_known_face_names():
 
     if len(known_face_names) == 0:   
         messagebox.showerror("Error", "No Face input received")
-        logging.error("ไม่พบรูปภาพหน้าตัว")
+        logging.error("No face input received")
     else:
-        print(f"รู้จักบุคคลจำนวน {len(known_face_names)} คน: {known_face_names}")
-        logging.info(f"รู้จักบุคคลจำนวน {len(known_face_names)} คน: {known_face_names}")
-    print(f"จำนวนรูปภาพในโฟลเดอร์: {image_count} รูป")
+        print(f"Known people count: {len(known_face_names)}")
+        logging.info(f"Known people count: {len(known_face_names)}")
+    print(f"Number of images in the folder: {image_count} images")
 
 
 def show_frame_r(label_r, folder_path, interval=5):
@@ -316,14 +334,8 @@ def detect_yolo(frame):
             img_folder = os.path.join(folder_path, "snapshots")
             img_snake = os.path.join(img_folder, f"snake_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_snake, frame)
-            file = {'imageFile':open(img_snake,'rb')}
-            message_S = {'message': 'ตรวจพบสิ่งต้องสงสัยคล้ายงู'}
-
-            time.sleep(0.3)
-            S = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_S)
-            time.sleep(0.3)
-            print(S.text)
-            logging.info(f"ส่งข้อความสำเร็จ: {S.text}")
+            message_S = 'Detected snake'
+            send_line(message_S, image_path=img_snake)
             snake_count = 0
     else:
         snake_count = 0
@@ -336,13 +348,8 @@ def detect_yolo(frame):
             img_folder = os.path.join(folder_path, "snapshots")
             img_person = os.path.join(img_folder, f"personfall_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_person, frame)
-            file = {'imageFile':open(img_person,'rb')}
-            message_P = {'message': 'ตรวจพบบุคคลที่คาดว่าต้องการความช่วยเหลือ'}
-            time.sleep(0.3)
-            P = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_P)
-            time.sleep(0.3)
-            print(P.text)
-            logging.info(f"ส่งข้อความสำเร็จ: {P.text}")
+            message_P = 'Detected child / person who may need help'
+            send_line(message_P, image_path=img_person)
             personfall_count = 0 
     else:
         personfall_count = 0 
@@ -355,14 +362,8 @@ def detect_yolo(frame):
             img_folder = os.path.join(folder_path, "snapshots")
             img_vomit = os.path.join(img_folder, f"vomit_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_vomit, frame)
-            file = {'imageFile':open(img_vomit,'rb')}
-            message_V = {'message': 'ตรวจพบเด็ก / บุคคลที่คาดว่าไม่สามารถช่วยเหลือตัวเองได้'}
-            
-            time.sleep(0.3)
-            V = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_V)
-            time.sleep(0.3)
-            print(V.text)
-            logging.info(f"ส่งข้อความสำเร็จ: {V.text}")
+            message_V = 'Detected child / person who may need help'
+            send_line(message_V, image_path=img_vomit)
             vomit_count = 0   
     else:
         vomit_count = 0 
@@ -404,17 +405,8 @@ def face_recog(frame):
                     img_unknow = os.path.join(img_folder, f"Unknow_{int(time.time())}.jpg")
                     frame_rgb = frame[:, :, ::-1]
                     cv2.imwrite(img_unknow, frame_rgb)
-                    try:
-                        file = {'imageFile':open(img_unknow,'rb')}
-                        message_b = {'message': "ตรวจพบบุคคลไม่ทราบชื่อ"}
-
-                        time.sleep(0.3)
-                        b = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_b)
-                        time.sleep(0.3)
-                        print(b.text)
-                        logging.info(f"ส่งข้อความสำเร็จ: {b.text}")
-                    except Exception as e:
-                        print(f"เกิดข้อผิดพลาด: {e}")
+                    message_b = "Detected unknown person"
+                    send_line(message_b, image_path=img_unknow)
                     unknown_frame_count = 0
                     last_unknown_notified_time = current_time
 
@@ -432,17 +424,8 @@ def face_recog(frame):
                     img_know = os.path.join(img_folder, f"Known_{name}_{int(time.time())}.jpg")
                     frame_rgb = frame[:, :, ::-1]
                     cv2.imwrite(img_know, frame_rgb)
-                    try:
-                        file = {'imageFile':open(img_know,'rb')}
-                        message_r = {'message': f"ตรวจพบ {name}"}
-
-                        time.sleep(0.3)
-                        r = session.post(url_line, headers=LINE_HEADERS, files=file, data=message_r)
-                        time.sleep(0.3)
-                        print(r.text)
-                        logging.info(f"ส่งข้อความสำเร็จ: {r.text}")
-                    except Exception as e:
-                        print(f"เกิดข้อผิดพลาด: {e}")
+                    message_r = f"Detected {name}"
+                    send_line(message_r, image_path=img_know)
                     known_frame_count = 0
                     last_known_notified_time = current_time
     return frame
@@ -461,12 +444,12 @@ def show_frame_a(label_a, detection_mode):
         small_frame = cv2.resize(frame, (320, 320))
         small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
         mode = detection_mode.get()
-        if mode == "Face_Recognition":
+        if mode == "Face-Detection-Mode":
             recognition_thread = threading.Thread(target=face_recog, args=(small_frame,))
             recognition_thread.start()
-        elif mode == "YOLO":
+        elif mode == "Danger-Scan-Mode":
             small_frame = detect_yolo(small_frame)
-        elif mode == "Both":
+        elif mode == "Full-Protection-Mode":
             small_frame = detect_yolo(small_frame)
             small_frame = face_recog(small_frame)
         img = Image.fromarray(small_frame)
@@ -499,9 +482,9 @@ def show_frame_b(label_b, detection_mode, url_1):
                 if mode == "Face_Recognition":
                     recognition_thread = threading.Thread(target=face_recog, args=(small_frame,))
                     recognition_thread.start()
-                elif mode == "YOLO":
+                elif mode == "Danger-Scan-Mode":
                     small_frame = detect_yolo(small_frame)
-                elif mode == "Both":
+                elif mode == "Full-Protection-Mode":
                     small_frame = detect_yolo(small_frame)
                     small_frame = face_recog(small_frame)
                 active_frame_count_b += 1
@@ -524,7 +507,7 @@ def toggle_camera_a():
     if detection_mode.get() == "Face_Recognition" and len(known_face_names) == 0:
         messagebox.showerror(
             "Error", "No known faces available. Please add known faces first.")
-        logging.error("ไม่พบรูปภาพหน้า")
+        logging.error("No face input received")
         return
     if running_a:
         running_a = False
@@ -545,7 +528,7 @@ def toggle_camera_b():
         messagebox.showerror(
             "Error", "No known faces available. Please add known faces first."
         )
-        logging.error("ไม่พบรูปภาพหน้า")
+        logging.error("No face input received")
         return
     if running_b:
         running_b = False
@@ -579,12 +562,12 @@ def show_frame_c(label_c, detection_mode, url_2):
             
             if active_frame_count_c < 30:
                 mode = detection_mode.get()
-                if mode == "Face_Recognition":
+                if mode == "Face-Detection-Mode":
                     recognition_thread = threading.Thread(target=face_recog, args=(small_frame,))
                     recognition_thread.start()
-                elif mode == "YOLO":
+                elif mode == "Danger-Scan-Mode":
                     small_frame = detect_yolo(small_frame)
-                elif mode == "Both":
+                elif mode == "Full-Protection-Mode":
                     small_frame = detect_yolo(small_frame)
                     small_frame = face_recog(small_frame)
                 active_frame_count_c += 1
@@ -646,9 +629,9 @@ def show_frame_d(label_d, detection_mode, url_3):
                 if mode == "Face_Recognition":
                     recognition_thread = threading.Thread(target=face_recog, args=(small_frame,))
                     recognition_thread.start()
-                elif mode == "YOLO":
+                elif mode == "Danger-Scan-Mode":
                     small_frame = detect_yolo(small_frame)
-                elif mode == "Both":
+                elif mode == "Full-Protection-Mode":
                     small_frame = detect_yolo(small_frame)
                     small_frame = face_recog(small_frame)
                 active_frame_count_d += 1
@@ -707,12 +690,12 @@ def show_frame_e(label_e, detection_mode, url_4):
             
             if active_frame_count_e < 30:
                 mode = detection_mode.get()
-                if mode == "Face_Recognition":
+                if mode == "Face-Detection-Mode":
                     recognition_thread = threading.Thread(target=face_recog, args=(small_frame,))
                     recognition_thread.start()
-                elif mode == "YOLO":
+                elif mode == "Danger-Scan-Mode":
                     small_frame = detect_yolo(small_frame)
-                elif mode == "Both":
+                elif mode == "Full-Protection-Mode":
                     small_frame = detect_yolo(small_frame)
                     small_frame = face_recog(small_frame)
                 active_frame_count_e += 1
@@ -771,12 +754,12 @@ def show_frame_f(label_f, detection_mode, url_5):
             
             if active_frame_count_f < 30:
                 mode = detection_mode.get()
-                if mode == "Face_Recognition":
+                if mode == "Face-Detection-Mode":
                     recognition_thread = threading.Thread(target=face_recog, args=(small_frame,))
                     recognition_thread.start()
-                elif mode == "YOLO":
+                elif mode == "Danger-Scan-Mode":
                     small_frame = detect_yolo(small_frame)
-                elif mode == "Both":
+                elif mode == "Full-Protection-Mode":
                     small_frame = detect_yolo(small_frame)
                     small_frame = face_recog(small_frame)
                 active_frame_count_f += 1
@@ -814,7 +797,8 @@ def toggle_camera_f():
             target=show_frame_f, args=(label_f, detection_mode, url_5)
         )
         thread_f.start()
-        
+
+
 def show_frame_g(label_g, detection_mode, url_6):
             global running_g, cap_g, frame_counter_g, active_frame_count_g
             if url_6:
@@ -835,12 +819,12 @@ def show_frame_g(label_g, detection_mode, url_6):
                     
                     if active_frame_count_g < 30:
                         mode = detection_mode.get()
-                        if mode == "Face_Recognition":
+                        if mode == "Face-Detection-Mode":
                             recognition_thread = threading.Thread(target=face_recog, args=(small_frame,))
                             recognition_thread.start()
-                        elif mode == "YOLO":
+                        elif mode == "Danger-Scan-Mode":
                             small_frame = detect_yolo(small_frame)
-                        elif mode == "Both":
+                        elif mode == "Full-Protection-Mode":
                             small_frame = detect_yolo(small_frame)
                             small_frame = face_recog(small_frame)
                         active_frame_count_g += 1
@@ -882,7 +866,7 @@ def toggle_camera_g():
 
 
 def start():
-    global Start_window, label_a, label_b, detection_mode , model_selection
+    global Start_window, label_a, label_b, detection_mode 
     find_known_face_names()
     Start_window = ctk.CTkToplevel(root)
     Start_window.title("Main Detection")
@@ -927,8 +911,8 @@ def start():
 
     text_rie_label = ctk.CTkLabel(
         logo_frame,
-        text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง วิทยาเขตชุมพรเขตรอุดมศักดิ์ \nRobotics and Intelligent Electronics Engineering",
-        font=ctk.CTkFont(size=16, weight="bold"),
+        text="King Mongkut's Institute of Technology Ladkrabang \nRobotics and Intelligent Electronics Engineering",
+        font=ctk.CTkFont(size=12, weight="bold"),
         justify="left",
     )
     text_rie_label.pack(side="left", padx=10, pady=(10, 10))
@@ -947,7 +931,7 @@ def start():
     label_a.pack(side="top", expand=True, padx=10)  
     toggle_a_button = ctk.CTkButton(
         frame_a,
-        text="เปิดกล้อง 1",
+        text="Camera 1",
         command=toggle_camera_a,
         fg_color="#1F6AA5",
         hover_color="#154870",
@@ -966,7 +950,7 @@ def start():
     ) 
     toggle_b_button = ctk.CTkButton(
         frame_b,
-        text="เปิดกล้อง 2",
+        text="Camera 2",
         command=toggle_camera_b,
         fg_color="#1F6AA5",
         hover_color="#154870",
@@ -978,7 +962,7 @@ def start():
     
     button1 = ctk.CTkButton(
         menu_frame,
-        text="ย้อนกลับ",
+        text="Back",
         corner_radius=8,
         command=close_window,
         width=100,
@@ -989,7 +973,7 @@ def start():
     
     button2 = ctk.CTkButton(
         menu_frame,
-        text="ตั้งค่า",
+        text="Setting",
         corner_radius=8,
         command=go_sitting,
         width=100,
@@ -1022,59 +1006,61 @@ def start():
     button4.pack(side="left", padx=10, pady=10)
 
 
-    detection_mode = tk.StringVar(value="")
-    model_selection = tk.StringVar(value="")
-    modes = ["Face_Recognition", "YOLO", "Both"]
-    model_choice = ["BASE", "RT-DETR", "World"]
-    
-    head_radio_frame = ctk.CTkFrame(Start_window)
-    head_radio_frame.pack(pady=(0,5), padx=10, fill="x", side="top")
 
+    detection_mode_frame = ctk.CTkFrame(Start_window, corner_radius=8)
+    detection_mode_frame.pack(pady=5, padx=10, fill="x")
 
-    mode_label = ctk.CTkLabel(
-        head_radio_frame,
+    # Compact header
+    detection_mode_label = ctk.CTkLabel(
+        detection_mode_frame,
         text="Detection Mode",
-        corner_radius=20,
         font=ctk.CTkFont(size=16, weight="bold"),
+        anchor="center"
     )
-    mode_label.pack(pady=(2, 2))
+    detection_mode_label.pack(pady=5, fill="x")
 
-    radio_frame = ctk.CTkFrame(head_radio_frame, corner_radius=10)
-    radio_frame.pack(pady=5, padx=10, fill="x", side="bottom")
+    # Compact modes frame
+    modes_frame = ctk.CTkFrame(detection_mode_frame, corner_radius=8, fg_color="#f0f0f0")
+    modes_frame.pack(pady=3, padx=10, fill="x")
 
-
-    mode_frame = ctk.CTkFrame(radio_frame, corner_radius=10)
-    mode_frame.pack(side="left", pady=5, padx=20, anchor="n")
-
-    mode_label = ctk.CTkLabel(
-        mode_frame,
+    modes_label = ctk.CTkLabel(
+        modes_frame,
         text="Modes",
-        font=ctk.CTkFont(size=16, weight="bold"),
+        font=ctk.CTkFont(size=14, weight="bold"),
     )
-    mode_label.pack(pady=(0, 2))
+    modes_label.pack(pady=(5, 2), padx=10, anchor="w")
 
-    for mode in modes:
-        rb = ctk.CTkRadioButton(
-            mode_frame, text=mode, variable=detection_mode, value=mode, corner_radius=8
-        )
-        rb.pack(pady=3, padx=20, anchor="w",fill="both")
 
-    model_frame = ctk.CTkFrame(radio_frame, corner_radius=10)
-    model_frame.pack(side="right", pady=5, padx=20, anchor="n")
+    radio_buttons_frame = ctk.CTkFrame(modes_frame, fg_color="transparent")
+    radio_buttons_frame.pack(pady=4, padx=10, fill="x")
 
-    model_label = ctk.CTkLabel(
-        model_frame,
-        text="Model Selection",
-        font=ctk.CTkFont(size=16, weight="bold"),
-    )
-    model_label.pack(pady=(0, 2))
+    # Configure grid to expand equally
+    for i in range(3):
+        radio_buttons_frame.columnconfigure(i, weight=1)
 
-    for mod in model_choice:
-        mr = ctk.CTkRadioButton(
-            model_frame, text=mod, variable=model_selection, value=mod, corner_radius=8
-        )
-        mr.pack(pady=3, padx=20, anchor="w",fill="both")
+    # Add radio buttons in individual frames
+    modes = ["Face-Detection-Mode", "Danger-Scan-Mode", "Full-Protection-Mode"]
+    detection_mode = tk.StringVar(value="")
+    for i, mode in enumerate(modes):
+        # Create a frame for each radio button
+        button_frame = ctk.CTkFrame(radio_buttons_frame, fg_color="transparent")
+        button_frame.grid(row=0, column=i, sticky="ew", padx=2)
         
+        # Make the frame expand to fill available space
+        button_frame.columnconfigure(0, weight=1)
+        
+        # Add radio button to its frame
+        rb = ctk.CTkRadioButton(
+            button_frame, 
+            text=mode, 
+            variable=detection_mode, 
+            value=mode, 
+            corner_radius=6,
+            font=ctk.CTkFont(size=12),
+            hover_color="#3a7ebf",
+            border_width_checked=4
+        )
+        rb.pack(pady=4, padx=5, anchor="w")  # Align left within its frame
 
 
 
@@ -1172,8 +1158,8 @@ def face_recording():
 
     text_rie_label = ctk.CTkLabel(
         logo_frame,
-        text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง วิทยาเขตชุมพรเขตรอุดมศักดิ์ \nRobotics and Intelligent Electronics Engineering",
-        font=ctk.CTkFont(size=16, weight="bold"),
+        text="King Mongkut's Institute of Technology Ladkrabang Prince of Chumphon Campus \nRobotics and Intelligent Electronics Engineering",
+        font=ctk.CTkFont(size=12, weight="bold"),
         justify="left",
     )
     text_rie_label.pack(side="left", padx=10, pady=(10, 10))
@@ -1194,7 +1180,7 @@ def face_recording():
     label_r.pack(
         side="top", expand=True, padx=10, pady=10
     )  
-    button1 = ctk.CTkButton(frame_r, text="เปิดกล้อง", command=toggle_camera_r)
+    button1 = ctk.CTkButton(frame_r, text="Open Camera", command=toggle_camera_r)
     button1.pack(side="bottom", pady=10)
     exit_bottom = ctk.CTkButton(
         video_frame, text="Exit", command=exit_face, fg_color="red", text_color="black"
@@ -1205,7 +1191,7 @@ def face_recording():
     input_data_frame.pack(side="right", fill="y", padx=(30, 30), pady=(5, 10))
 
     label_name = ctk.CTkLabel(
-        input_data_frame, text="ใส่ชื่อ", font=ctk.CTkFont(size=16, weight="bold")
+        input_data_frame, text="Name", font=ctk.CTkFont(size=16, weight="bold")
     )
     label_name.pack(padx=10, pady=5)
     entry_name = ctk.CTkEntry(input_data_frame, placeholder_text="Enter image name")
@@ -1236,7 +1222,7 @@ def face_recording():
     for name in range(len(All_name)):
         Name = ctk.CTkLabel(
             scrollable_frame,
-            text=f"บุคคลที่{name+1} : {All_name[name]}",
+            text=f"Person {name+1} : {All_name[name]}",
             font=ctk.CTkFont(size=12, weight="normal"),
         ) 
         Name.pack(padx=10, pady=5)
@@ -1419,7 +1405,7 @@ def setting():
 
     head_User_manual = ctk.CTkLabel(
         center_frame,
-        text="คู่มือการใช้งานระบบรักษาความปลอดภัย",
+        text="User Manual",
         font=ctk.CTkFont(size=18, weight="bold"),
         corner_radius=40,
     )
@@ -1432,7 +1418,7 @@ def setting():
 
     User_manual_1 = ctk.CTkLabel(
         User_manual_frame,
-        text="1.ผู้ใช้งานระบบจำเป็นต้องลงทะเบียนกล้องที่ ",
+        text="1.The user must register the camera at ",
         image=images_logos["address_logo"],
         compound="right",
         font=ctk.CTkFont(size=14),
@@ -1442,7 +1428,7 @@ def setting():
 
     User_manual_2 = ctk.CTkLabel(
         User_manual_frame,
-        text="    • กรอกชื่อผู้ใช้ระบบ ",
+        text="    • Enter the system user name ",
         image=images_logos["user_logo"],
         compound="right",
         font=ctk.CTkFont(size=14),
@@ -1452,7 +1438,7 @@ def setting():
 
     User_manual_3 = ctk.CTkLabel(
         User_manual_frame,
-        text="    • กรอกรหัสผู้ใช้ระบบ ",
+        text="    • Enter the system user password ",
         image=images_logos["lock_logo"],
         compound="right",
         font=ctk.CTkFont(size=14),
@@ -1462,7 +1448,7 @@ def setting():
 
     User_manual_4 = ctk.CTkLabel(
         User_manual_frame,
-        text="    • กรอก IP ของกล้องผู้ใช้ ",
+        text="    • Enter the IP address of the camera user ",
         image=images_logos["IP_address_logo"],
         compound="right",
         font=ctk.CTkFont(size=14),
@@ -1472,7 +1458,7 @@ def setting():
 
     User_manual_5 = ctk.CTkLabel(
         User_manual_frame,
-        text="    • เลือกคุณภาพของภาพ ",
+        text="    • Select the image quality ",
         image=images_logos["sitting_logo"],
         compound="right",
         font=ctk.CTkFont(size=14),
@@ -1482,7 +1468,7 @@ def setting():
 
     User_manual_6 = ctk.CTkLabel(
         User_manual_frame,
-        text="2. ระบบสามารถตรวจจับได้ทั้งหมด 4 อย่างได้แก่",
+        text="2. The system can detect all 4 types of events",
         font=ctk.CTkFont(size=14),
         text_color="black",
     )
@@ -1490,7 +1476,7 @@ def setting():
 
     User_manual_7 = ctk.CTkLabel(
         User_manual_frame,
-        text="    • คนล้ม  ",
+        text="    • Person fall  ",
         image=images_logos["rescue_logo"],
         compound="right",
         font=ctk.CTkFont(size=14),
@@ -1501,7 +1487,7 @@ def setting():
 
     User_manual_8 = ctk.CTkLabel(
         User_manual_frame,
-        text="    • งู  ",
+        text="    • Snake  ",
         image=images_logos["snake_logo"],
         compound="right",
         font=ctk.CTkFont(size=14),
@@ -1512,7 +1498,7 @@ def setting():
 
     User_manual_9 = ctk.CTkLabel(
         User_manual_frame,
-        text="    • เด็กสำลอก  ",
+        text="    • Baby vomit  ",
         image=images_logos["baby_logo"],
         compound="right",
         font=ctk.CTkFont(size=14),
@@ -1523,7 +1509,7 @@ def setting():
 
     User_manual_10 = ctk.CTkLabel(
         User_manual_frame,
-        text="    • คนแปลกหน้า  ",
+        text="    • Stranger  ",
         image=images_logos["bandit_logo"],
         compound="right",
         font=ctk.CTkFont(size=14),
@@ -1599,17 +1585,17 @@ def setting():
     tabview.add("Camera 6")
 
 
-    label_Head = ctk.CTkLabel(tabview.tab("Camera 1"), text="ลงข้อมูลเชื่อมต่อระบบ", font=ctk.CTkFont(size=24, weight="bold"))
+    label_Head = ctk.CTkLabel(tabview.tab("Camera 1"), text="Enter connection data", font=ctk.CTkFont(size=24, weight="bold"))
     label_Head.pack(padx=10, pady=5)
-    label_Head = ctk.CTkLabel(tabview.tab("Camera 2"), text="ลงข้อมูลเชื่อมต่อระบบ", font=ctk.CTkFont(size=24, weight="bold"))
+    label_Head = ctk.CTkLabel(tabview.tab("Camera 2"), text="Enter connection data", font=ctk.CTkFont(size=24, weight="bold"))
     label_Head.pack(padx=10, pady=5)
-    label_Head = ctk.CTkLabel(tabview.tab("Camera 3"), text="ลงข้อมูลเชื่อมต่อระบบ", font=ctk.CTkFont(size=24, weight="bold"))
+    label_Head = ctk.CTkLabel(tabview.tab("Camera 3"), text="Enter connection data", font=ctk.CTkFont(size=24, weight="bold"))
     label_Head.pack(padx=10, pady=5)
-    label_Head = ctk.CTkLabel(tabview.tab("Camera 4"), text="ลงข้อมูลเชื่อมต่อระบบ", font=ctk.CTkFont(size=24, weight="bold"))
+    label_Head = ctk.CTkLabel(tabview.tab("Camera 4"), text="Enter connection data", font=ctk.CTkFont(size=24, weight="bold"))
     label_Head.pack(padx=10, pady=5)
-    label_Head = ctk.CTkLabel(tabview.tab("Camera 5"), text="ลงข้อมูลเชื่อมต่อระบบ", font=ctk.CTkFont(size=24, weight="bold"))
+    label_Head = ctk.CTkLabel(tabview.tab("Camera 5"), text="Enter connection data", font=ctk.CTkFont(size=24, weight="bold"))
     label_Head.pack(padx=10, pady=5)
-    label_Head = ctk.CTkLabel(tabview.tab("Camera 6"), text="ลงข้อมูลเชื่อมต่อระบบ", font=ctk.CTkFont(size=24, weight="bold"))
+    label_Head = ctk.CTkLabel(tabview.tab("Camera 6"), text="Enter connection data", font=ctk.CTkFont(size=24, weight="bold"))
     label_Head.pack(padx=10, pady=5)
 
     label_width = 80 
@@ -1617,7 +1603,7 @@ def setting():
     name_frame = ctk.CTkFrame(tabview.tab("Camera 1"), fg_color="transparent")
     name_frame.pack(padx=10, pady=5, fill="x")
 
-    label_name = ctk.CTkLabel(name_frame, text=" ลงชื่อ", image=images_logos["user_logo"], compound="left", width=label_width, anchor="w", font=ctk.CTkFont(size=14))
+    label_name = ctk.CTkLabel(name_frame, text=" Name", image=images_logos["user_logo"], compound="left", width=label_width, anchor="w", font=ctk.CTkFont(size=14))
     label_name.pack(side="left", padx=10, pady=5)
 
     entry_name = ctk.CTkEntry(name_frame, placeholder_text="Enter name")
@@ -1626,7 +1612,7 @@ def setting():
     password_frame = ctk.CTkFrame(tabview.tab("Camera 1"), fg_color="transparent")
     password_frame.pack(padx=10, pady=5, fill="x")
 
-    label_password = ctk.CTkLabel(password_frame, text=" รหัสผ่าน", image=images_logos["lock_logo"], compound="left", width=label_width, anchor="w", font=ctk.CTkFont(size=14))
+    label_password = ctk.CTkLabel(password_frame, text=" Password", image=images_logos["lock_logo"], compound="left", width=label_width, anchor="w", font=ctk.CTkFont(size=14))
     label_password.pack(side="left", padx=10, pady=5)
 
     entry_password_sitting = ctk.CTkEntry(password_frame, show="*", placeholder_text="Enter password")
@@ -1646,11 +1632,11 @@ def setting():
     port_frame = ctk.CTkFrame(tabview.tab("Camera 1"), fg_color="transparent")
     port_frame.pack(padx=10, pady=5, fill="x")
 
-    label_port = ctk.CTkLabel(port_frame, text=" คุณภาพ", image=images_logos["sitting_logo"], compound="left", width=label_width, anchor="w", font=ctk.CTkFont(size=14))
+    label_port = ctk.CTkLabel(port_frame, text=" Quality", image=images_logos["sitting_logo"], compound="left", width=label_width, anchor="w", font=ctk.CTkFont(size=14))
     label_port.pack(side="left", padx=10, pady=5)
 
 
-    quality_values = ["เลือกคุณภาพ", "คุณภาพสูง", "ประสิทธิภาพสูง"]
+    quality_values = ["Select Quality", "High Quality", "High Performance"]
     optionmenu_quality_values = ctk.CTkOptionMenu(port_frame, dynamic_resizing=True, values=quality_values,command=quality_selected)
     optionmenu_quality_values.pack(side="left", fill="x", expand=True, padx=10)
 
@@ -1728,13 +1714,13 @@ def setting():
 
     label_port = ctk.CTkLabel(
         second_frame,
-        text="โดยทั่วไปแล้ว RTSP Link จะมีหน้าตาดังนี้ \n rtsp://Rachata:123456@198.162.0.100:554/stream1 \n โดยที่แยกได้เป็นดังนี้ \n rtsp:// ชื่อผู้ใช้ : รหัสผู้ใช้ @ ip_camera: port(554) / คุณภาพ",
+        text="In general, the RTSP link will have the following appearance \n rtsp://Rachata:123456@198.162.0.100:554/stream1 \n It can be divided as follows \n rtsp:// username: password @ ip_camera: port(554) / quality",
         font=ctk.CTkFont(size=14),
     )
     label_port.pack(padx=10, pady=5)
 
     url_now = ctk.CTkLabel(
-        second_frame, text=f" Link RTSP ของคุณคือ \n {url_1}", font=ctk.CTkFont(size=14)
+        second_frame, text=f" Your RTSP link is \n {url_1}", font=ctk.CTkFont(size=14)
     )
     url_now.pack(padx=10, pady=5)
 
@@ -1757,7 +1743,7 @@ def setting():
 
     lable_ScrollableFrame = ctk.CTkLabel(
         main_frame_Third,
-        text="รายชื่อบุคคลที่ลงทะเบียน",
+        text="List of registered people",
         font=ctk.CTkFont(size=25, weight="bold"),
     )
     lable_ScrollableFrame.pack(padx=10, pady=5)
@@ -1770,7 +1756,7 @@ def setting():
     for name in range(len(All_name)):
         Name_sitting = ctk.CTkLabel(
             mane_frame_Third,
-            text=f"บุคคลที่{name+1} : {All_name[name]}",
+            text=f"Person {name+1} : {All_name[name]}",
             font=ctk.CTkFont(size=16, weight="normal"),
             text_color="black",
         )
@@ -1808,10 +1794,10 @@ def input_dialog_Address_1():
     if address_1:
         ip_camera_url_1 = address_1
         print("Address :", ip_camera_url_1)
-        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 1: {ip_camera_url_1}")
+        logging.info(f"Received IP Address of Camera 1: {ip_camera_url_1}")
     else:
         print("No address input received")
-        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 1")
+        logging.error("No IP Address received for Camera 1")
 
 def input_dialog_Address_2():
     global ip_camera_url_2
@@ -1820,10 +1806,10 @@ def input_dialog_Address_2():
     if address_2:
         ip_camera_url_2 = address_2
         print("Address :", ip_camera_url_2)
-        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 2: {ip_camera_url_2}")
+        logging.info(f"Received IP Address of Camera 2: {ip_camera_url_2}")
     else:
         print("No address input received")
-        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 2")
+        logging.error("No IP Address received for Camera 2")
 
 def input_dialog_Address_3():
     global ip_camera_url_3
@@ -1832,10 +1818,10 @@ def input_dialog_Address_3():
     if address_3:
         ip_camera_url_3 = address_3
         print("Address :", ip_camera_url_3)
-        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 3: {ip_camera_url_3}")
+        logging.info(f"Received IP Address of Camera 3: {ip_camera_url_3}")
     else:
         print("No address input received")
-        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 3")
+        logging.error("No IP Address received for Camera 3")
 
 
 def input_dialog_Address_4():
@@ -1845,10 +1831,10 @@ def input_dialog_Address_4():
     if address_4:
         ip_camera_url_4 = address_4
         print("Address :", ip_camera_url_4)
-        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 4: {ip_camera_url_4}")
+        logging.info(f"Received IP Address of Camera 4: {ip_camera_url_4}")
     else:
         print("No address input received")
-        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 4")
+        logging.error("No IP Address received for Camera 4")
 
 
 def input_dialog_Address_5():
@@ -1858,10 +1844,10 @@ def input_dialog_Address_5():
     if address_5:
         ip_camera_url_5 = address_5
         print("Address :", ip_camera_url_5)
-        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 5: {ip_camera_url_5}")
+        logging.info(f"Received IP Address of Camera 5: {ip_camera_url_5}")
     else:
         print("No address input received")
-        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 5")
+        logging.error("No IP Address received for Camera 5")
 
 
 def input_dialog_Address_6():
@@ -1871,10 +1857,10 @@ def input_dialog_Address_6():
     if address_6:
         ip_camera_url_6 = address_6
         print("Address :", ip_camera_url_6)
-        logging.info(f"รับข้อมูล IP Address ของกล้องที่ 6: {ip_camera_url_6}")
+        logging.info(f"Received IP Address of Camera 6: {ip_camera_url_6}")
     else:
         print("No address input received")
-        logging.error("ไม่พบข้อมูล IP Address ของกล้องที่ 6")
+        logging.error("No IP Address received for Camera 6")
 
 
 def combine_button_1():
@@ -1886,7 +1872,7 @@ def combine_button_1():
         password = entry_password_sitting.get() 
         url_1 = f'rtsp://{name}:{password}@{ip_camera_url_1}:554/{global_selected_quality}'
         print("Address:", url_1)
-        url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_1}")
+        url_now.configure(text=f"Your RTSP link is \n {url_1}")
     else:
         print("No address input received")
         messagebox.showerror("Error", "No address input received")
@@ -1902,7 +1888,7 @@ def combine_button_2():
         url_2 = f'rtsp://{name}:{password}@{ip_camera_url_2}:554/{global_selected_quality}'
         print("Address:", url_2)
 
-        url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_2}")
+        url_now.configure(text=f"Your RTSP link is \n {url_2}")
     else:
         print("No address input received")
         messagebox.showerror("Error", "No address input received")
@@ -1919,7 +1905,7 @@ def combine_button_3():
         print("Address:", url_3)
         
         
-        url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_3}")
+        url_now.configure(text=f"Your RTSP link is \n {url_3}")
     else:
         print("No address input received")
         messagebox.showerror("Error", "No address input received")
@@ -1936,7 +1922,7 @@ def combine_button_4():
         print("Address:", url_4)
         
         
-        url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_4}")
+        url_now.configure(text=f"Your RTSP link is \n {url_4}")
     else:
         print("No address input received")
         messagebox.showerror("Error", "No address input received")
@@ -1953,7 +1939,7 @@ def combine_button_5():
         print("Address:", url_5)
         
         
-        url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_5}")
+        url_now.configure(text=f"Your RTSP link is \n {url_5}")
     else:
         print("No address input received")
         messagebox.showerror("Error", "No address input received")
@@ -1970,7 +1956,7 @@ def combine_button_6():
         print("Address:", url_6)
         
         
-        url_now.configure(text=f"Link RTSP ของคุณคือ \n {url_6}")
+        url_now.configure(text=f"Your RTSP link is \n {url_6}")
     else:
         print("No address input received")
         messagebox.showerror("Error", "No address input received")
@@ -1979,7 +1965,7 @@ def combine_button_6():
 def exit_program():
     if messagebox.askokcancel("Exit", "Do you really want to exit?"):
         root.destroy() 
-        logging.info("กำลังปิดโปรแกรม")
+        logging.info("Closing program")
         logging.info("=========================================================================")
 
 
@@ -1989,7 +1975,7 @@ def change_appearance_mode_event(new_appearance_mode: str):
 
 def Main_window():
     ctk.set_appearance_mode("Light")
-    root.title("ระบบความปลอดภัย")
+    root.title("Security System")
     root.geometry("1000x700")
     root.resizable(False, False)
     load_image()
@@ -2034,8 +2020,8 @@ def Main_window():
 
     text_rie_label = ctk.CTkLabel(
         text_container,
-        text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบังวิทยาเขตชุมพรเขตรอุดมศักดิ์",
-        font=ctk.CTkFont(family="FC Minimal", size=15, weight="bold"),
+        text="King Mongkut's Institute of Technology Ladkrabang Prince of Chumphon Campus",
+        font=ctk.CTkFont(family="FC Minimal", size=13, weight="bold"),
         justify="left",
         text_color=("#E35205", "#F9FFFC"),
     )
@@ -2044,7 +2030,7 @@ def Main_window():
     subtitle_label = ctk.CTkLabel(
         text_container,
         text="Robotics and Intelligent Electronics Engineering",
-        font=ctk.CTkFont(family="FC Minimal", size=21, weight="bold"),
+        font=ctk.CTkFont(family="FC Minimal", size=16, weight="bold"),
         justify="left",
         text_color=("#E35205", "#F9FFFC"),
     )
@@ -2061,7 +2047,7 @@ def Main_window():
 
     logo_label = ctk.CTkLabel(
         menu_frame,
-        text="ระบบความปลอดภัย",
+        text="Security System",
         font=ctk.CTkFont(family="FC Minimal", size=48, weight="bold"),
         text_color="#E35205",
     )
@@ -2166,7 +2152,7 @@ def Additional_Detection_1():
 
     text_rie_label = ctk.CTkLabel(
         logo_frame,
-        text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง วิทยาเขตชุมพรเขตรอุดมศักดิ์\nRobotics and Intelligent Electronics Engineering",
+        text="King Mongkut's Institute of Technology Ladkrabang Prince of Chumphon Campus \nRobotics and Intelligent Electronics Engineering",
         font=ctk.CTkFont(size=16, weight="bold"),
         justify="left",
     )
@@ -2187,7 +2173,7 @@ def Additional_Detection_1():
     label_c.pack(side="top", expand=True, pady=(10, 0))
 
 
-    button1 = ctk.CTkButton(frame_c, text="เปิดกล้อง 3", command=toggle_camera_c)
+    button1 = ctk.CTkButton(frame_c, text="Open Camera 3", command=toggle_camera_c)
     button1.pack(side="bottom", pady=(10, 10))
 
     menu_frame = ctk.CTkFrame(Additional, height=100)
@@ -2195,12 +2181,12 @@ def Additional_Detection_1():
 
 
     add_camera_button = ctk.CTkButton(
-        menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
+        menu_frame, text="Add Camera", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
     
     back_button = ctk.CTkButton(
-        menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
+        menu_frame, text="Back", corner_radius=5, width=15, command=exit_Additional
     )
     back_button.pack(side="left", padx=10, pady=10)
 
@@ -2247,7 +2233,7 @@ def additional_Detection_2():
 
     text_rie_label = ctk.CTkLabel(
         logo_frame,
-        text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง วิทยาเขตชุมพรเขตรอุดมศักดิ์\nRobotics and Intelligent Electronics Engineering",
+        text="King Mongkut's Institute of Technology Ladkrabang Prince of Chumphon Campus \nRobotics and Intelligent Electronics Engineering",
         font=ctk.CTkFont(size=16, weight="bold"),
         justify="left",
     )
@@ -2268,7 +2254,7 @@ def additional_Detection_2():
     )
     label_c.pack(side="top", expand=True, pady=(10, 0))
 
-    buttonc = ctk.CTkButton(frame_c, text="เปิดกล้อง 3")
+    buttonc = ctk.CTkButton(frame_c, text="Open Camera 3")
     buttonc.pack(side="bottom", pady=(10, 10))
 
     
@@ -2282,7 +2268,7 @@ def additional_Detection_2():
     )
     label_d.pack(side="top", expand=True, pady=(10, 0))
 
-    buttond = ctk.CTkButton(frame_d, text="เปิดกล้อง 4")
+    buttond = ctk.CTkButton(frame_d, text="Open Camera 4")
     buttond.pack(side="bottom", pady=(10, 10))
 
     
@@ -2291,13 +2277,13 @@ def additional_Detection_2():
 
     
     add_camera_button = ctk.CTkButton(
-        menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
+            menu_frame, text="Add Camera", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
 
 
     back_button = ctk.CTkButton(
-        menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
+        menu_frame, text="Back", corner_radius=5, width=15, command=exit_Additional
     )
     back_button.pack(side="left", padx=10, pady=10)
 
@@ -2344,7 +2330,7 @@ def additional_Detection_3():
 
     text_rie_label = ctk.CTkLabel(
         logo_frame,
-        text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง วิทยาเขตชุมพรเขตรอุดมศักดิ์\nRobotics and Intelligent Electronics Engineering",
+        text="King Mongkut's Institute of Technology Ladkrabang Prince of Chumphon Campus \nRobotics and Intelligent Electronics Engineering",
         font=ctk.CTkFont(size=16, weight="bold"),
         justify="left",
     )
@@ -2365,7 +2351,7 @@ def additional_Detection_3():
     )
     label_c.pack(side="top", expand=True, pady=(10, 0))
 
-    buttonc = ctk.CTkButton(frame_c, text="เปิดกล้อง 3")
+    buttonc = ctk.CTkButton(frame_c, text="Open Camera 3")
     buttonc.pack(side="bottom", pady=(10, 10))
 
     
@@ -2379,7 +2365,7 @@ def additional_Detection_3():
     )
     label_d.pack(side="top", expand=True, pady=(10, 0))
 
-    buttond = ctk.CTkButton(frame_d, text="เปิดกล้อง 4")
+    buttond = ctk.CTkButton(frame_d, text="Open Camera 4")
     buttond.pack(side="bottom", pady=(10, 10))
 
     
@@ -2393,7 +2379,7 @@ def additional_Detection_3():
     )
     label_e.pack(side="top", expand=True, pady=(10, 0))
 
-    buttone = ctk.CTkButton(frame_e, text="เปิดกล้อง 5")
+    buttone = ctk.CTkButton(frame_e, text="Open Camera 5")
     buttone.pack(side="bottom", pady=(10, 10))
 
     
@@ -2402,13 +2388,13 @@ def additional_Detection_3():
 
     
     add_camera_button = ctk.CTkButton(
-        menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
+        menu_frame, text="Add Camera", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
 
     
     back_button = ctk.CTkButton(
-        menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
+        menu_frame, text="Back", corner_radius=5, width=15, command=exit_Additional
     )
     back_button.pack(side="left", padx=10, pady=10)
 
@@ -2455,7 +2441,7 @@ def additional_Detection_4():
 
     text_rie_label = ctk.CTkLabel(
         logo_frame,
-        text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง วิทยาเขตชุมพรเขตรอุดมศักดิ์\nRobotics and Intelligent Electronics Engineering",
+        text="King Mongkut's Institute of Technology Ladkrabang Prince of Chumphon Campus \nRobotics and Intelligent Electronics Engineering",
         font=ctk.CTkFont(size=16, weight="bold"),
         justify="left",
     )
@@ -2480,7 +2466,7 @@ def additional_Detection_4():
     )
     label_c.pack(side="top", expand=True, pady=(10, 0))
 
-    buttonc = ctk.CTkButton(frame_c, text="เปิดกล้อง 1")
+    buttonc = ctk.CTkButton(frame_c, text="Open Camera 1")
     buttonc.pack(side="bottom", pady=(10, 10))
 
     frame_d = ctk.CTkFrame(
@@ -2493,7 +2479,7 @@ def additional_Detection_4():
     )
     label_d.pack(side="top", expand=True, pady=(10, 0))
 
-    buttond = ctk.CTkButton(frame_d, text="เปิดกล้อง 2")
+    buttond = ctk.CTkButton(frame_d, text="Open Camera 2")
     buttond.pack(side="bottom", pady=(10, 10))
 
 
@@ -2511,7 +2497,7 @@ def additional_Detection_4():
     )
     label_e.pack(side="top", expand=True, pady=(10, 0))
 
-    buttone = ctk.CTkButton(frame_e, text="เปิดกล้อง 3")
+    buttone = ctk.CTkButton(frame_e, text="Open Camera 3")
     buttone.pack(side="bottom", pady=(10, 10))
 
 
@@ -2525,7 +2511,7 @@ def additional_Detection_4():
     )
     label_f.pack(side="top", expand=True, pady=(10, 0))
 
-    buttonf = ctk.CTkButton(frame_f, text="เปิดกล้อง 4")
+    buttonf = ctk.CTkButton(frame_f, text="Open Camera 4")
     buttonf.pack(side="bottom", pady=(10, 10))
 
     
@@ -2534,13 +2520,13 @@ def additional_Detection_4():
 
     
     add_camera_button = ctk.CTkButton(
-        menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
+        menu_frame, text="Add Camera", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
 
     
     back_button = ctk.CTkButton(
-        menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
+        menu_frame, text="Back", corner_radius=5, width=15, command=exit_Additional
     )
     back_button.pack(side="left", padx=10, pady=10)
 
@@ -2587,7 +2573,7 @@ def additional_Detection_5():
 
     text_rie_label = ctk.CTkLabel(
         logo_frame,
-        text="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง วิทยาเขตชุมพรเขตรอุดมศักดิ์\nRobotics and Intelligent Electronics Engineering",
+        text="King Mongkut's Institute of Technology Ladkrabang Prince of Chumphon Campus \nRobotics and Intelligent Electronics Engineering",
         font=ctk.CTkFont(size=16, weight="bold"),
         justify="left",
     )
@@ -2612,7 +2598,7 @@ def additional_Detection_5():
     )
     label_c.pack(side="top", expand=True, pady=(10, 0))
 
-    buttonc = ctk.CTkButton(frame_c, text="เปิดกล้อง 1")
+    buttonc = ctk.CTkButton(frame_c, text="Open Camera 1")
     buttonc.pack(side="bottom", pady=(10, 10))
 
     frame_d = ctk.CTkFrame(
@@ -2625,7 +2611,7 @@ def additional_Detection_5():
     )
     label_d.pack(side="top", expand=True, pady=(10, 0))
 
-    buttond = ctk.CTkButton(frame_d, text="เปิดกล้อง 2")
+    buttond = ctk.CTkButton(frame_d, text="Open Camera 2")
     buttond.pack(side="bottom", pady=(10, 10))
 
     frame_e = ctk.CTkFrame(
@@ -2638,7 +2624,7 @@ def additional_Detection_5():
     )
     label_e.pack(side="top", expand=True, pady=(10, 0))
 
-    buttone = ctk.CTkButton(frame_e, text="เปิดกล้อง 3")
+    buttone = ctk.CTkButton(frame_e, text="Open Camera 3")
     buttone.pack(side="bottom", pady=(10, 10))
 
     bottom_container = ctk.CTkFrame(video_container)
@@ -2654,7 +2640,7 @@ def additional_Detection_5():
     )
     label_f.pack(side="top", expand=True, pady=(10, 0))
 
-    buttonf = ctk.CTkButton(frame_f, text="เปิดกล้อง 4")
+    buttonf = ctk.CTkButton(frame_f, text="Open Camera 4")
     buttonf.pack(side="bottom", pady=(10, 10))
 
     frame_g = ctk.CTkFrame(
@@ -2667,7 +2653,7 @@ def additional_Detection_5():
     )
     label_g.pack(side="top", expand=True, pady=(10, 0))
 
-    buttong = ctk.CTkButton(frame_g, text="เปิดกล้อง 5")
+    buttong = ctk.CTkButton(frame_g, text="Open Camera 5")
     buttong.pack(side="bottom", pady=(10, 10))
 
     
@@ -2676,12 +2662,12 @@ def additional_Detection_5():
 
     
     add_camera_button = ctk.CTkButton(
-        menu_frame, text="เพิ่มกล้อง", corner_radius=5, width=15, command=add_camera_frames
+        menu_frame, text="Add Camera", corner_radius=5, width=15, command=add_camera_frames
     )
     add_camera_button.pack(side="left", padx=10, pady=10)
 
     back_button = ctk.CTkButton(
-        menu_frame, text="ย้อนกลับ", corner_radius=5, width=15, command=exit_Additional
+        menu_frame, text="Back", corner_radius=5, width=15, command=exit_Additional
     )
     back_button.pack(side="left", padx=10, pady=10)
 
@@ -2696,7 +2682,7 @@ def clear_window():
 def add_camera_frames():
     global Additional
     num_frames = simpledialog.askinteger(
-        "เพิ่มกล้อง", "ใส่จำนวนกล้อง (1-5):", minvalue=1, maxvalue=5
+        "Add Camera", "Enter the number of cameras (1-5):", minvalue=1, maxvalue=5
     )
     if num_frames == 1:
         Additional.destroy()
@@ -2719,10 +2705,10 @@ def exit_Additional():
 
 if __name__ == "__main__":
     try:
-        logging.info("กำลังเริ่มต้นการทำงานของโปรแกรม")
+        logging.info("Starting the program")
         Main_window()
     except Exception as e:
-        logging.error(f"เกิดข้อผิดพลาด: {e}")
+        logging.error(f"An error occurred: {e}")
         messagebox.showerror("Error", "An error occurred while running the program.")
         exit_program()
         logging.info("=========================================================================")
