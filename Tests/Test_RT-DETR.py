@@ -13,7 +13,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logs/REDETR_detection.log'),
+        logging.FileHandler('../my-senior-project/Logs/REDETR_detection.log'),
         logging.StreamHandler()
     ]
 )
@@ -22,7 +22,7 @@ load_dotenv()
 
 folder_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 models_path = os.path.join(folder_path, "models")
-snapshots_path = os.path.join(folder_path, "snapshots")
+snapshots_path = os.path.join(folder_path, "Snapshots")
 
 path_REDETR = os.path.join(models_path, "ModelRT.pt")
 model_REDETR = RTDETR(path_REDETR)

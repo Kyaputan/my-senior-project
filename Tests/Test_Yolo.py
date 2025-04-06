@@ -13,7 +13,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('../my-senior-project/logs/yolo_detection.log'),
+        logging.FileHandler('../my-senior-project/Logs/yolo_detection.log'),
         logging.StreamHandler()
     ]
 )
@@ -22,7 +22,7 @@ load_dotenv()
 
 folder_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 models_path = os.path.join(folder_path, "models")
-snapshots_path = os.path.join(folder_path, "snapshots")
+snapshots_path = os.path.join(folder_path, "Snapshots")
 
 path_Yolo = os.path.join(models_path, "ModelYolo.onnx")
 model_Yolo = YOLO(path_Yolo , task="detect")

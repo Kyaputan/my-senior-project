@@ -3,9 +3,10 @@ import subprocess
 import sys
 import platform
 
-folder_1 = "database"
-folder_2 = "snapshots"
-folder_3 = "logs"
+os.system("cls" if os.name == "nt" else "clear")
+folder_1 = "Database"
+folder_2 = "Snapshots"
+folder_3 = "Logs"
 folder_4 = "Videos"
 
 now_path = os.path.dirname(os.path.realpath(__file__))

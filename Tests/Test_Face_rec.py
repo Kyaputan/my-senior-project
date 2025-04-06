@@ -6,6 +6,18 @@ import time
 import logging
 from tkinter import messagebox
 
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('../my-senior-project/Logs/face_rec_detection.log'),
+        logging.StreamHandler()
+    ]
+    
+)
+
 face_locations = []
 face_encodings = []
 known_face_images = []
@@ -13,12 +25,13 @@ known_face_encodings = []
 known_face_names = []
 last_known_notified_time = last_unknown_notified_time = 0
 unknown_frame_count = known_frame_count = 0
+Total_known_frame_count = 0
 folder_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 
 def find_known_face_names():
     folder_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    Face_path = os.path.join(folder_path, "database")
+    Face_path = os.path.join(folder_path, "Database")
     image_count = 0
     for filename in os.listdir(Face_path):
         image_count += 1
@@ -52,7 +65,7 @@ def find_known_face_names():
 
 def face_recog(frame):
     global last_known_notified_time, last_unknown_notified_time, face_encodings
-    global unknown_frame_count, known_frame_count, known_face_names, face_locations
+    global unknown_frame_count, known_frame_count, known_face_names, face_locations , Total_known_frame_count
     face_names = []
     face_locations = face_recognition.face_locations(frame)
     face_encodings = face_recognition.face_encodings(frame, face_locations)
@@ -79,9 +92,9 @@ def face_recog(frame):
             print("test_face_unknown")
             print(f"unknown_frame_count = {unknown_frame_count}")
             if unknown_frame_count >= 10:
-                if current_time - last_unknown_notified_time > 20:
-
-                    img_folder = os.path.join(folder_path, "snapshots")
+                if current_time - last_unknown_notified_time > 1:
+                    logging.info("Unknown face detected")
+                    img_folder = os.path.join(folder_path, "Snapshots")
                     img_unknow = os.path.join(img_folder, f"Unknow_{int(time.time())}.jpg")
                     frame_rgb = frame[:, :, :]
                     cv2.imwrite(img_unknow, frame_rgb)
@@ -89,16 +102,17 @@ def face_recog(frame):
                     last_unknown_notified_time = current_time
 
         else:
-            known_frame_count += 1 
-
+            known_frame_count += 1
+            Total_known_frame_count += 1
+            logging.info(f"Known face detected : {Total_known_frame_count}")
             if known_frame_count >= 5:
                 unknown_frame_count = 0
             print("test_face_known")
             print(f"known_frame_count = {known_frame_count}")
             if known_frame_count >= 10:
-                if current_time - last_known_notified_time > 10:
-                    
-                    img_folder = os.path.join(folder_path, "snapshots")
+                if current_time - last_known_notified_time > 1:
+                    logging.info("Known face detected")
+                    img_folder = os.path.join(folder_path, "Snapshots")
                     img_know = os.path.join(img_folder, f"Known_{name}_{int(time.time())}.jpg")
                     frame_rgb = frame[:, :, :]
                     cv2.imwrite(img_know, frame_rgb)
@@ -115,3 +129,7 @@ if __name__ == "__main__":
         cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    video_capture.release()
+    cv2.destroyAllWindows()
+    logging.info("Face recognition system stopped")
+    logging.info("="*100)

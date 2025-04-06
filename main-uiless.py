@@ -13,7 +13,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logs/main-uiless.log'),
+        logging.FileHandler('Logs/main-uiless.log'),
         logging.StreamHandler()
     ]
 )
@@ -22,7 +22,7 @@ load_dotenv()
 
 folder_path = os.path.dirname(os.path.realpath(__file__))
 models_path = os.path.join(folder_path, "models")
-snapshots_path = os.path.join(folder_path, "snapshots")
+snapshots_path = os.path.join(folder_path, "Snapshots")
 
 path_Yolo = os.path.join(models_path, "ModelYolo.onnx")
 model_Yolo = YOLO(path_Yolo , task="detect")
@@ -79,7 +79,7 @@ def detect_yolo(frame):
         if snake_count == 10:
             logging.info("Snake detection threshold reached - sending notification")
             print(f"time Detection : {time.time()}")
-            img_snake = os.path.join(snapshots_path, f"snake_detected_{int(time.time())}.jpg")
+            img_snake = os.path.join(snapshots_path, f"Snake_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_snake, frame)
 
             file = {'imageFile': open(img_snake, 'rb')}
@@ -97,7 +97,7 @@ def detect_yolo(frame):
         if personfall_count == 30:
             logging.info("Person fall detection threshold reached - sending notification")
             print(f"time Detection : {time.time()}")
-            img_person = os.path.join(snapshots_path, f"personfall_detected_{int(time.time())}.jpg")
+            img_person = os.path.join(snapshots_path, f"Personfall_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_person, frame)
 
             file = {'imageFile': open(img_person, 'rb')}
@@ -115,7 +115,7 @@ def detect_yolo(frame):
         if vomit_count == 3:
             logging.info("Vomit detection threshold reached - sending notification")
             print(f"time Detection : {time.time()}")
-            img_vomit = os.path.join(snapshots_path, f"vomit_detected_{int(time.time())}.jpg")
+            img_vomit = os.path.join(snapshots_path, f"Vomit_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_vomit, frame)
 
             file = {'imageFile': open(img_vomit, 'rb')}

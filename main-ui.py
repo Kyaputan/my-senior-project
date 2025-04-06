@@ -18,7 +18,7 @@ except Exception as e:
     print(f"An error occurred: {e}")
 
 logging.basicConfig(
-    filename="logs/main.log",
+    filename="Logs/main.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -35,7 +35,7 @@ LINE_HEADERS = {"Authorization":"Bearer "+ API_KEY }
 session = requests.Session()
 root = ctk.CTk()
 folder_path = os.path.dirname(os.path.realpath(__file__))
-path_Yolo = os.path.join(folder_path, "models", "modelYolo.onnx")
+path_Yolo = os.path.join(folder_path, "models", "ModelYolo.onnx")
 path_RTDETR = os.path.join(folder_path, "models", "ModelRT.pt")
 
 # Send Line
@@ -233,7 +233,7 @@ def show_frame(frame_name):
 def find_known_face_names():
     global image_count
     folder_path = os.path.dirname(os.path.realpath(__file__))
-    Face_path = os.path.join(folder_path, "database")
+    Face_path = os.path.join(folder_path, "Database")
 
     for filename in os.listdir(Face_path):
         image_count += 1
@@ -331,8 +331,8 @@ def detect_yolo(frame):
         print(f"snake_count : {snake_count}")
         if snake_count == 10:
             
-            img_folder = os.path.join(folder_path, "snapshots")
-            img_snake = os.path.join(img_folder, f"snake_detected_{int(time.time())}.jpg")
+            img_folder = os.path.join(folder_path, "Snapshots")
+            img_snake = os.path.join(img_folder, f"Snake_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_snake, frame)
             message_S = 'Detected snake'
             send_line(message_S, image_path=img_snake)
@@ -345,8 +345,8 @@ def detect_yolo(frame):
         print(f"personfall_count : {personfall_count}")
         if personfall_count == 30: 
             
-            img_folder = os.path.join(folder_path, "snapshots")
-            img_person = os.path.join(img_folder, f"personfall_detected_{int(time.time())}.jpg")
+            img_folder = os.path.join(folder_path, "Snapshots")
+            img_person = os.path.join(img_folder, f"Personfall_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_person, frame)
             message_P = 'Detected child / person who may need help'
             send_line(message_P, image_path=img_person)
@@ -359,8 +359,8 @@ def detect_yolo(frame):
         print(f"vomit_count : {vomit_count}")
         if vomit_count == 3: 
             
-            img_folder = os.path.join(folder_path, "snapshots")
-            img_vomit = os.path.join(img_folder, f"vomit_detected_{int(time.time())}.jpg")
+            img_folder = os.path.join(folder_path, "Snapshots")
+            img_vomit = os.path.join(img_folder, f"Vomit_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_vomit, frame)
             message_V = 'Detected child / person who may need help'
             send_line(message_V, image_path=img_vomit)
@@ -401,7 +401,7 @@ def face_recog(frame):
             if unknown_frame_count >= 10:
                 if current_time - last_unknown_notified_time > 20:
 
-                    img_folder = os.path.join(folder_path, "snapshots")
+                    img_folder = os.path.join(folder_path, "Snapshots")
                     img_unknow = os.path.join(img_folder, f"Unknow_{int(time.time())}.jpg")
                     frame_rgb = frame[:, :, ::-1]
                     cv2.imwrite(img_unknow, frame_rgb)
@@ -420,7 +420,7 @@ def face_recog(frame):
             if known_frame_count >= 10:
                 if current_time - last_known_notified_time > 10:
                     
-                    img_folder = os.path.join(folder_path, "snapshots")
+                    img_folder = os.path.join(folder_path, "Snapshots")
                     img_know = os.path.join(img_folder, f"Known_{name}_{int(time.time())}.jpg")
                     frame_rgb = frame[:, :, ::-1]
                     cv2.imwrite(img_know, frame_rgb)
