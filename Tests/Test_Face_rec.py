@@ -45,7 +45,7 @@ def find_known_face_names():
                 encoding_exists = False
                 for known_encoding in known_face_encodings:
                     distance = np.linalg.norm(known_encoding - encoding[0])
-                    if distance < 0.6:
+                    if distance < 0.2:
                         encoding_exists = True
                         break
                 if not encoding_exists:
@@ -59,7 +59,7 @@ def find_known_face_names():
         messagebox.showerror("Error", "No Face input received")
         logging.error("No face input received")
     else:
-        print(f"Known people count: {len(known_face_names)}")
+        print(f"Known people count: {len(known_face_names)} Name: {known_face_names}")
         logging.info(f"Known people count: {len(known_face_names)}")
     print(f"Number of images in the folder: {image_count} images")
 
@@ -80,7 +80,7 @@ def face_recog(frame):
         
         confidence = (1 - face_distances[best_match_index]) * 100  
         
-        if matches[best_match_index] and confidence > 45:
+        if matches[best_match_index] and confidence > 5:
             name = known_face_names[best_match_index]
         face_names.append(name)
         current_time = time.time()

@@ -38,7 +38,6 @@ folder_path = os.path.dirname(os.path.realpath(__file__))
 path_Yolo = os.path.join(folder_path, "models", "ModelYolo.onnx")
 path_RTDETR = os.path.join(folder_path, "models", "ModelRT.pt")
 
-# Send Line
 Send_line = False
 
 
@@ -49,10 +48,8 @@ def send_line(message, image_path=None):
                 with open(image_path, 'rb') as file:
                     files = {'imageFile': file}
                     message_data = {'message': message}
-                    
                     time.sleep(0.3)  
                     response = session.post(url_line, headers=LINE_HEADERS, files=files, data=message_data)
-                    
                     if response.status_code == 200:
                         logging.info(f"Successfully sent message and image: {response.status_code}")
                     else:
@@ -60,17 +57,14 @@ def send_line(message, image_path=None):
             else:
                 message_data = {'message': message}
                 response = session.post(url_line, headers=LINE_HEADERS, data=message_data)
-
                 if response.status_code == 200:
                     logging.info(f"Successfully sent message: {response.status_code}")
                 else:
                     logging.error(f"Failed to send message: {response.status_code}")
-
         except Exception as e:
             logging.error(f"An error occurred: {e}")
     else:
         logging.info("Closing message sending")
-        
 
 send_line(message="Welcome to the My-SENIOR-PROJECT")
 
@@ -400,7 +394,6 @@ def face_recog(frame):
             print(f"unknown_frame_count = {unknown_frame_count}")
             if unknown_frame_count >= 10:
                 if current_time - last_unknown_notified_time > 20:
-
                     img_folder = os.path.join(folder_path, "Snapshots")
                     img_unknow = os.path.join(img_folder, f"Unknow_{int(time.time())}.jpg")
                     frame_rgb = frame[:, :, ::-1]
@@ -409,7 +402,6 @@ def face_recog(frame):
                     send_line(message_b, image_path=img_unknow)
                     unknown_frame_count = 0
                     last_unknown_notified_time = current_time
-
         else:
             known_frame_count += 1 
 
@@ -1026,6 +1018,7 @@ def start():
     modes_label = ctk.CTkLabel(
         modes_frame,
         text="Modes",
+        text_color=("black"),
         font=ctk.CTkFont(size=14, weight="bold"),
     )
     modes_label.pack(pady=(5, 2), padx=10, anchor="w")
@@ -1042,25 +1035,22 @@ def start():
     modes = ["Face-Detection-Mode", "Danger-Scan-Mode", "Full-Protection-Mode"]
     detection_mode = tk.StringVar(value="")
     for i, mode in enumerate(modes):
-        # Create a frame for each radio button
+        
         button_frame = ctk.CTkFrame(radio_buttons_frame, fg_color="transparent")
         button_frame.grid(row=0, column=i, sticky="ew", padx=2)
-        
-        # Make the frame expand to fill available space
         button_frame.columnconfigure(0, weight=1)
-        
-        # Add radio button to its frame
         rb = ctk.CTkRadioButton(
             button_frame, 
             text=mode, 
             variable=detection_mode, 
             value=mode, 
             corner_radius=6,
+            text_color=("black"),
             font=ctk.CTkFont(size=12),
             hover_color="#3a7ebf",
             border_width_checked=4
         )
-        rb.pack(pady=4, padx=5, anchor="w")  # Align left within its frame
+        rb.pack(pady=4, padx=5, anchor="w")  
 
 
 
@@ -1970,6 +1960,7 @@ def exit_program():
 
 
 def change_appearance_mode_event(new_appearance_mode: str):
+    logging.info(f"Changing appearance mode to {new_appearance_mode}")
     ctk.set_appearance_mode(new_appearance_mode)
 
 

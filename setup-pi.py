@@ -3,7 +3,6 @@ import subprocess
 import sys
 import platform
 
-os.system("cls" if os.name == "nt" else "clear")
 folder_1 = "Database"
 folder_2 = "Snapshots"
 folder_3 = "Logs"
@@ -59,18 +58,13 @@ else:
 def install_requirements():
     if os.path.exists('requirements.txt'):
         print_styled("INSTALLING DEPENDENCIES FROM requirements.txt", "yellow")
-
-        current_platform = platform.system().lower()
-        
         try:
-            if current_platform == 'windows':
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-                print_styled("INSTALLATION SUCCESSFUL ON WINDOWS!", "cyan")
-            elif current_platform == 'linux':
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-                print_styled("INSTALLATION SUCCESSFUL ON RASPBERRY PI!", "cyan")
-            else:
-                print_styled("UNSUPPORTED PLATFORM. INSTALLATION MAY FAIL.", "red")
+            subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+            print_styled("INSTALLATION SUCCESSFUL ON WINDOWS!", "cyan")
         except subprocess.CalledProcessError as e:
             print_styled(f"AN ERROR OCCURRED WHILE INSTALLING DEPENDENCIES: {e}", "red")
     else:
