@@ -1206,7 +1206,7 @@ def face_recording():
     btn_delete_b.pack(padx=10, pady=5)
 
     scrollable_frame = ctk.CTkScrollableFrame(
-        input_data_frame, label_text="CTkScrollableFrame"
+        input_data_frame, label_text="Database"
     )
     scrollable_frame.pack(padx=10, pady=5)
     for name in range(len(All_name)):
@@ -1347,7 +1347,7 @@ def setting():
         corner_radius=0,
         height=40,
         border_spacing=10,
-        text="Frame 2",
+        text="Setting",
         fg_color="transparent",
         text_color=("gray10", "gray90"),
         hover_color=("gray70", "gray30"),
@@ -1362,7 +1362,7 @@ def setting():
         corner_radius=0,
         height=40,
         border_spacing=10,
-        text="Frame 3",
+        text="Face Database",
         fg_color="transparent",
         text_color=("gray10", "gray90"),
         hover_color=("gray70", "gray30"),
