@@ -55,20 +55,3 @@ if not os.path.exists(folder_4_path):
 else:
     print_styled(f"FOLDER {folder_4_path} ALREADY EXISTS. SKIPPING CREATION.", "blue")
 
-def install_requirements():
-    if os.path.exists('requirements.txt'):
-        print_styled("INSTALLING DEPENDENCIES FROM requirements.txt", "yellow")
-        try:
-            subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                )
-            print_styled("INSTALLATION SUCCESSFUL ON WINDOWS!", "cyan")
-        except subprocess.CalledProcessError as e:
-            print_styled(f"AN ERROR OCCURRED WHILE INSTALLING DEPENDENCIES: {e}", "red")
-    else:
-        print_styled("NO requirements.txt FILE FOUND.", "red")
-
-# Run the installation
-install_requirements()
