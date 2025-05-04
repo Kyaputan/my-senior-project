@@ -4,7 +4,6 @@ import numpy as np
 import os
 import time
 import logging
-from tkinter import messagebox
 
 
 # Configure logging
@@ -56,7 +55,6 @@ def find_known_face_names():
                     time.sleep(0.1)
 
     if len(known_face_names) == 0:   
-        messagebox.showerror("Error", "No Face input received")
         logging.error("No face input received")
     else:
         print(f"Known people count: {len(known_face_names)} Name: {known_face_names}")
