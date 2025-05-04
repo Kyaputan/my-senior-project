@@ -30,43 +30,46 @@ API_KEY = os.getenv("API_KEY")
 global_selected_quality = ""
 ip_camera_url_1 = ip_camera_url_2 = ip_camera_url_3 = ip_camera_url_4 = ip_camera_url_5 = ip_camera_url_6 = ""
 url_1 = url_2 = url_3 = url_4 = url_5 = url_6 = ""
-url_line = "https://notify-api.line.me/api/notify"
-LINE_HEADERS = {"Authorization":"Bearer "+ API_KEY }
+
 session = requests.Session()
 root = ctk.CTk()
 folder_path = os.path.dirname(os.path.realpath(__file__))
 path_Yolo = os.path.join(folder_path, "models", "ModelYolo.onnx")
 path_RTDETR = os.path.join(folder_path, "models", "ModelRT.pt")
 
-Send_line = False
+Send_message = False
 
 
-def send_line(message, image_path=None):
-    if Send_line:
+def send_message(message, image_path=None):
+    if Send_message:
         try:
-            if image_path:
-                with open(image_path, 'rb') as file:
-                    files = {'imageFile': file}
-                    message_data = {'message': message}
-                    time.sleep(0.3)  
-                    response = session.post(url_line, headers=LINE_HEADERS, files=files, data=message_data)
-                    if response.status_code == 200:
-                        logging.info(f"Successfully sent message and image: {response.status_code}")
-                    else:
-                        logging.error(f"Failed to send message and image: {response.status_code}")
-            else:
-                message_data = {'message': message}
-                response = session.post(url_line, headers=LINE_HEADERS, data=message_data)
-                if response.status_code == 200:
-                    logging.info(f"Successfully sent message: {response.status_code}")
+            url_line = "https://notify-api.line.me/api/notify"
+            LINE_HEADERS = {"Authorization":"Bearer "+ API_KEY}
+            response = session.post(url_line, headers=LINE_HEADERS , data = {'message': "status_code : 200"})
+            try:    
+                if image_path:
+                    with open(image_path, 'rb') as file:
+                        files = {'imageFile': file}
+                        message_data = {'message': message}
+                        time.sleep(0.3)  
+                        response = session.post(url_line, headers=LINE_HEADERS, files=files, data=message_data)
+                        if response.status_code == 200:
+                            logging.info(f"Successfully sent message and image: {response.status_code}")
+                        else:
+                            logging.error(f"Failed to send message and image: {response.status_code}")
                 else:
-                    logging.error(f"Failed to send message: {response.status_code}")
+                    message_data = {'message': message}
+                    response = session.post(url_line, headers=LINE_HEADERS, data=message_data)
+                    if response.status_code == 200:
+                        logging.info(f"Successfully sent message: {response.status_code}")
+                    else:
+                        logging.error(f"Failed to send message: {response.status_code}")
+            except requests.exceptions.RequestException as e:
+                logging.error(f"Request failed: {e}")
         except Exception as e:
             logging.error(f"An error occurred: {e}")
     else:
         logging.info("Closing message sending")
-
-send_line(message="Welcome to the My-SENIOR-PROJECT")
 
 
 try:
@@ -193,6 +196,11 @@ def load_image():
     images_logos["loupe_logo"] = ctk.CTkImage(
         light_image=Image.open(os.path.join(image_path, "loupe.png")), size=(30, 30)
     )
+
+send_message(
+    message="Welcome to the My-SENIOR-PROJECT",
+    image_path=os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets", "KMITL-Photoroom.png")
+)
 
 
 def quality_selected(selected_port):
@@ -329,7 +337,7 @@ def detect_yolo(frame):
             img_snake = os.path.join(img_folder, f"Snake_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_snake, frame)
             message_S = 'Detected snake'
-            send_line(message_S, image_path=img_snake)
+            send_message(message_S, image_path=img_snake)
             snake_count = 0
     else:
         snake_count = 0
@@ -343,7 +351,7 @@ def detect_yolo(frame):
             img_person = os.path.join(img_folder, f"Personfall_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_person, frame)
             message_P = 'Detected child / person who may need help'
-            send_line(message_P, image_path=img_person)
+            send_message(message_P, image_path=img_person)
             personfall_count = 0 
     else:
         personfall_count = 0 
@@ -357,7 +365,7 @@ def detect_yolo(frame):
             img_vomit = os.path.join(img_folder, f"Vomit_detected_{int(time.time())}.jpg")
             cv2.imwrite(img_vomit, frame)
             message_V = 'Detected child / person who may need help'
-            send_line(message_V, image_path=img_vomit)
+            send_message(message_V, image_path=img_vomit)
             vomit_count = 0   
     else:
         vomit_count = 0 
@@ -399,7 +407,7 @@ def face_recog(frame):
                     frame_rgb = frame[:, :, ::-1]
                     cv2.imwrite(img_unknow, frame_rgb)
                     message_b = "Detected unknown person"
-                    send_line(message_b, image_path=img_unknow)
+                    send_message(message_b, image_path=img_unknow)
                     unknown_frame_count = 0
                     last_unknown_notified_time = current_time
         else:
@@ -417,7 +425,7 @@ def face_recog(frame):
                     frame_rgb = frame[:, :, ::-1]
                     cv2.imwrite(img_know, frame_rgb)
                     message_r = f"Detected {name}"
-                    send_line(message_r, image_path=img_know)
+                    send_message(message_r, image_path=img_know)
                     known_frame_count = 0
                     last_known_notified_time = current_time
     return frame
