@@ -5,3 +5,5 @@
 /logs
 /Videos
 *.pyc
+*.xml
+*.iml

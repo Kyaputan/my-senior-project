@@ -382,15 +382,9 @@ def face_recog(frame):
     for face_encoding in face_encodings:
         matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
         name = "Unknown"
-        face_distances = face_recognition.face_distance(
-            known_face_encodings, face_encoding
-        )
-        best_match_index = face_distances.argmin()
-        
-        confidence = (1 - face_distances[best_match_index]) * 100  
-        
-        if matches[best_match_index] and confidence > 45:
-            name = known_face_names[best_match_index]
+        if True in matches:
+            first_match_index = matches.index(True)
+            name = known_face_names[first_match_index]
         face_names.append(name)
         current_time = time.time()
 

@@ -33,7 +33,7 @@ def print_styled(message, style="bold"):
    
 if not os.path.exists(folder_1_path):
     os.makedirs(folder_1_path)
-    print_styled(f"CREATED FOLDER: {folder_1} AT {now_path}", "green")
+    print_styled(f"CREATED FOLDER: {folder_1} AT {now_path}", style="green")
 else:
     print_styled(f"FOLDER {folder_1_path} ALREADY EXISTS. SKIPPING CREATION.", "blue")
 
