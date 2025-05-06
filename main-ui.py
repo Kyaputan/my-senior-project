@@ -10,7 +10,6 @@ try:
     import threading
     import face_recognition
     import requests
-    from queue import Queue
     import numpy as np
     from dotenv import load_dotenv
     import logging
@@ -97,7 +96,7 @@ frame_counter_e =active_frame_count_e = 0
 frame_counter_f =active_frame_count_f = 0
 frame_counter_g =active_frame_count_g = 0
 interval = 5
-Face_path = os.path.join(folder_path, "database")
+Face_path = os.path.join(folder_path, "Database")
 image_count  = 0
 home_frame = second_frame = Third_frame = None
 entry_name = entry_password_sitting = url_now = ""
@@ -303,7 +302,7 @@ def toggle_camera_r():
         running_r = True
         cap_r = cv2.VideoCapture(0)  
         folder_path = os.path.dirname(os.path.realpath(__file__))
-        Face_path = os.path.join(folder_path, "database")
+        Face_path = os.path.join(folder_path, "Database")
         thread_r = threading.Thread(
             target=show_frame_r, args=(label_r, Face_path, interval)
         )
@@ -1090,7 +1089,7 @@ def show_camera_b_value():
 def find_names():
     global All_name
     folder_path = os.path.dirname(os.path.realpath(__file__))
-    Face_path = os.path.join(folder_path, "database")
+    Face_path = os.path.join(folder_path, "Database")
     for filename in os.listdir(Face_path):
         if filename.endswith(".jpg"):
             name_without_extension = os.path.splitext(filename)[0]   
@@ -1235,7 +1234,7 @@ def save_image_b():
             filename = entry_name.get()
             if filename:
                 folder_path = os.path.dirname(os.path.realpath(__file__))
-                Face_path = os.path.join(folder_path, "database")
+                Face_path = os.path.join(folder_path, "Database")
                 full_filename = os.path.join(Face_path, f"{filename}.jpg")
                 logging.info(f"Image saved at: {full_filename}")
                 logging.info(f"By : {filename}")
@@ -1273,7 +1272,7 @@ def delete_image_face():
             for ext in [".jpg", ".jpeg"]:
                 file_path = os.path.join(
                     os.path.dirname(os.path.realpath(__file__)),  
-                    "database",  
+                    "Database",  
                     f"{filename}{ext}", 
                 )
                 if os.path.exists(file_path):
@@ -1292,7 +1291,7 @@ def delete_image_sitting():
         if messagebox.askokcancel(
             "Delete !!!", f"Do you really want to delete {filename}?"):
             for ext in [".jpg", ".jpeg"]:
-                file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"database",  f"{filename}{ext}")
+                file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Database",  f"{filename}{ext}")
                 print(file_path)
                 if os.path.exists(file_path):
                     os.remove(file_path)
